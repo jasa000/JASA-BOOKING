@@ -10,17 +10,16 @@ export const useUser = () => {
   const auth = useAuth();
 
   useEffect(() => {
-    if (!auth) {
-      setLoading(false);
-      return;
-    };
-    
-    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-      setUser(authUser);
-      setLoading(false);
-    });
+    if (auth) {
+      const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+        setUser(authUser);
+        setLoading(false);
+      });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    } else {
+      setLoading(false);
+    }
   }, [auth]);
 
   return { user, loading };

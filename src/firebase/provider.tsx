@@ -54,16 +54,10 @@ export const useFirebaseApp = () => {
 
 export const useAuth = () => {
     const { auth } = useFirebase();
-    if (!auth) {
-        throw new Error('Firebase Auth not initialized');
-    }
     return auth;
 }
 
 export const useFirestore = () => {
     const { firestore } = useFirebase();
-    if (!firestore) {
-        throw new Error('Firestore not initialized');
-    }
     return firestore;
 }
