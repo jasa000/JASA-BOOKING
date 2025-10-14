@@ -1,10 +1,19 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { useAuth } from '@/firebase';
 
-export const useUser = () => {
+// Extend the return type to include setUser
+type UseUserReturn = {
+  user: User | null;
+  loading: boolean;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+};
+
+
+export const useUser = (): UseUserReturn => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const auth = useAuth();
@@ -22,5 +31,5 @@ export const useUser = () => {
     }
   }, [auth]);
 
-  return { user, loading };
+  return { user, loading, setUser };
 };

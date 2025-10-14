@@ -1,3 +1,4 @@
+
 "use client"
 
 import {
@@ -13,7 +14,6 @@ import { useAuth, useFirestore } from "@/firebase"
 import { useRouter } from "next/navigation"
 import { Skeleton } from "@/components/ui/skeleton"
 import { LogIn, LayoutDashboard } from "lucide-react"
-import { ThemeToggle } from "./theme-toggle"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,7 +76,6 @@ export function UserNav() {
 
   return (
     <div className="flex items-center gap-2">
-      <ThemeToggle />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">

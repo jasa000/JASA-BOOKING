@@ -39,13 +39,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { sendPasswordResetEmail, deleteUser } from "firebase/auth";
+import { sendPasswordResetEmail, deleteUser, updateProfile } from "firebase/auth";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Camera } from "lucide-react";
+import { ImageCropper } from "@/components/image-cropper";
+import { uploadImage } from "@/lib/cloudinary";
+
 
 const profileFormSchema = z.object({
   displayName: z.string().min(2, "Name must be at least 2 characters."),
@@ -59,13 +63,17 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function ProfilePage() {
-  const { user, loading: userLoading } = useUser();
+  const { user, loading: userLoading, setUser } = useUser();
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
+
+  const [imageToCrop, setImageToCrop] = React.useState<string | null>(null);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const userDocRef = React.useMemo(() => {
     if (!firestore || !user) return null;
@@ -110,11 +118,63 @@ export default function ProfilePage() {
     }
   }, [user, userProfile, profileLoading, form]);
 
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageToCrop(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageUpload = async (croppedImage: Blob) => {
+    if (!user || !userDocRef) return;
+    setIsUploading(true);
+    setImageToCrop(null);
+    try {
+      const file = new File([croppedImage], `${user.uid}.png`, { type: 'image/png' });
+      const photoURL = await uploadImage(file);
+
+      // Update auth profile
+      if (auth?.currentUser) {
+        await updateProfile(auth.currentUser, { photoURL });
+      }
+      
+      // Update firestore
+      await setDoc(userDocRef, { photoURL }, { merge: true });
+
+      // Force a re-render/re-fetch of user to get new photoURL
+      setUser({ ...user, photoURL });
+
+      toast({
+        title: "Profile Photo Updated",
+        description: "Your new profile photo has been saved.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Upload Failed",
+        description: "Could not update your profile photo. Please try again.",
+      });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+  
   const onSubmit = async (data: ProfileFormValues) => {
     if (!userDocRef) return;
     setIsSubmitting(true);
     try {
       await setDoc(userDocRef, data, { merge: true });
+      if(auth?.currentUser && auth.currentUser.displayName !== data.displayName) {
+          await updateProfile(auth.currentUser, { displayName: data.displayName });
+          setUser({...user!, displayName: data.displayName});
+      }
       toast({
         title: "Profile Updated",
         description: "Your information has been saved successfully.",
@@ -217,19 +277,48 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <ImageCropper
+        image={imageToCrop}
+        onCropComplete={handleImageUpload}
+        onClose={() => {
+          setImageToCrop(null);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        }}
+      />
       <div className="max-w-3xl mx-auto space-y-8">
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-4">
-              <Avatar className="h-24 w-24 border-4 border-primary">
-                <AvatarImage src={user.photoURL || undefined} alt={user.displayName || ""} />
-                <AvatarFallback className="text-3xl">
-                  {user.displayName ? user.displayName.charAt(0) : user.email?.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                <Avatar className="h-24 w-24 border-4 border-primary">
+                  <AvatarImage src={user.photoURL || undefined} alt={user.displayName || ""} />
+                  <AvatarFallback className="text-3xl">
+                    {user.displayName ? user.displayName.charAt(0) : user.email?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={onFileChange}
+                  className="hidden"
+                  accept="image/png, image/jpeg"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute bottom-0 right-0 rounded-full h-8 w-8 bg-muted/80 hover:bg-muted"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  <Camera className="h-4 w-4" />
+                </Button>
+              </div>
               <div>
                 <CardTitle className="text-3xl font-headline">{form.watch('displayName') || 'User'}</CardTitle>
                 <p className="text-muted-foreground">{user.email}</p>
+                 {isUploading && <p className="text-sm text-muted-foreground animate-pulse">Uploading...</p>}
               </div>
             </div>
           </CardHeader>
