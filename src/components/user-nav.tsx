@@ -12,6 +12,7 @@ import { signOut } from "firebase/auth"
 import { useAuth } from "@/firebase"
 import { useRouter } from "next/navigation"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ThemeToggle } from "./theme-toggle"
 
 export function UserNav() {
   const { user, loading } = useUser();
@@ -27,25 +28,36 @@ export function UserNav() {
   };
 
   if (loading) {
-    return <Skeleton className="h-10 w-28" />;
+    return (
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-10 w-28" />
+        <Skeleton className="h-10 w-10" />
+      </div>
+    )
   }
 
   if (!user) {
     return (
-      <Link href="/login">
-        <Button>Sign up / Sign in</Button>
-      </Link>
+      <div className="flex items-center gap-2">
+        <Link href="/login">
+          <Button>Sign up / Sign in</Button>
+        </Link>
+        <ThemeToggle />
+      </div>
     );
   }
 
   return (
-    <Link href="/profile">
-      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-        <Avatar className="h-8 w-8">
-          {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || ""} />}
-          <AvatarFallback>{(user.displayName ? user.displayName.charAt(0) : user.email?.charAt(0))?.toUpperCase()}</AvatarFallback>
-        </Avatar>
-      </Button>
-    </Link>
+    <div className="flex items-center gap-2">
+      <Link href="/profile">
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || ""} />}
+            <AvatarFallback>{(user.displayName ? user.displayName.charAt(0) : user.email?.charAt(0))?.toUpperCase()}</AvatarFallback>
+          </Avatar>
+        </Button>
+      </Link>
+      <ThemeToggle />
+    </div>
   )
 }
