@@ -60,21 +60,28 @@ export default function ProfilePage() {
   });
 
   React.useEffect(() => {
-    if (userProfile) {
-      form.reset({
-        displayName: userProfile.displayName || "",
-        mobileNumber: userProfile.mobileNumber || "",
-        altMobileNumber: userProfile.altMobileNumber || "",
-        schoolOrCollege: userProfile.schoolOrCollege || "",
-        address: userProfile.address || "",
-        altEmail: userProfile.altEmail || "",
-      });
-    } else if (user) {
+    if (user) {
+      if (userProfile) {
         form.reset({
-            displayName: user.displayName || "",
-        })
+          displayName: userProfile.displayName || user.displayName || "",
+          mobileNumber: userProfile.mobileNumber || "",
+          altMobileNumber: userProfile.altMobileNumber || "",
+          schoolOrCollege: userProfile.schoolOrCollege || "",
+          address: userProfile.address || "",
+          altEmail: userProfile.altEmail || "",
+        });
+      } else if (!profileLoading) {
+          form.reset({
+              displayName: user.displayName || "",
+              mobileNumber: "",
+              altMobileNumber: "",
+              schoolOrCollege: "",
+              address: "",
+              altEmail: "",
+          })
+      }
     }
-  }, [userProfile, user, form]);
+  }, [user, userProfile, profileLoading, form]);
 
   const onSubmit = async (data: ProfileFormValues) => {
     if (!userDocRef) return;
@@ -136,7 +143,7 @@ export default function ProfilePage() {
                 </AvatarFallback>
                 </Avatar>
                 <div>
-                    <CardTitle className="text-3xl font-headline">{user.displayName || 'User'}</CardTitle>
+                    <CardTitle className="text-3xl font-headline">{form.watch('displayName') || 'User'}</CardTitle>
                     <p className="text-muted-foreground">{user.email}</p>
                 </div>
             </div>
@@ -228,14 +235,14 @@ export default function ProfilePage() {
                     <FormItem>
                       <FormLabel>Alternative Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. personal@example.com" {...field} />
+                        <Input placeholder="e.g. personal@example.com" {...field} value={field.value ?? ''}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting || !form.formState.isDirty}>
                   {isSubmitting ? "Saving..." : "Save Changes"}
                 </Button>
               </form>
@@ -246,3 +253,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
