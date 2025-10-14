@@ -1,10 +1,12 @@
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, Upload } from "lucide-react"
 import { format } from "date-fns"
+import React from "react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -35,6 +37,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { events } from "@/lib/data"
+import { uploadImage } from "@/lib/cloudinary"
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -52,10 +59,18 @@ const formSchema = z.object({
   category: z.string({
     required_error: "Please select a category.",
   }),
+  image: z
+    .instanceof(File)
+    .refine((file) => file?.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
+    .refine(
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
+      "Only .jpg, .jpeg, .png and .webp formats are supported."
+    ).optional(),
 })
 
 export default function CreateEventPage() {
   const { toast } = useToast()
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -64,14 +79,43 @@ export default function CreateEventPage() {
       location: "",
     },
   })
+  
+  const fileRef = form.register("image");
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    toast({
-      title: "Event Submitted!",
-      description: "Your event has been sent for admin approval.",
-    })
-    form.reset()
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
+    try {
+      let imageUrl = "";
+      if (values.image) {
+        imageUrl = await uploadImage(values.image);
+      }
+
+      const newEvent = {
+        ...values,
+        imageUrl,
+        id: (events.length + 1).toString(), 
+        status: 'pending', 
+        organizer: 'Current User', // This should be replaced with actual user data
+        imageHint: values.title,
+      };
+
+      console.log("New Event Data:", newEvent)
+      
+      toast({
+        title: "Event Submitted!",
+        description: "Your event has been sent for admin approval.",
+      })
+      form.reset();
+    } catch (error) {
+       toast({
+        variant: "destructive",
+        title: "Upload Failed",
+        description: "Could not upload image. Please try again.",
+      })
+    } finally {
+      setIsSubmitting(false);
+    }
   }
   
   const categories = [...new Set(events.map(event => event.category))];
@@ -116,6 +160,23 @@ export default function CreateEventPage() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="image"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Event Image</FormLabel>
+                    <FormControl>
+                       <div className="flex items-center gap-4">
+                        <Input type="file" {...fileRef} className="flex-1"/>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <FormField
                   control={form.control}
@@ -195,7 +256,9 @@ export default function CreateEventPage() {
                   )}
                 />
 
-              <Button type="submit" className="bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:opacity-90 transition-opacity">Submit for Approval</Button>
+              <Button type="submit" className="bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:opacity-90 transition-opacity" disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Submit for Approval"}
+              </Button>
             </form>
           </Form>
         </CardContent>
