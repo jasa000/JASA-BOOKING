@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Home } from "lucide-react"
+import { Home, PlusSquare } from "lucide-react"
 
 import { MainNav } from "@/components/main-nav"
 import { UserNav } from "@/components/user-nav"
@@ -18,7 +18,13 @@ export function SiteHeader() {
           </Link>
         </div>
         <MainNav />
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <div className="flex flex-1 items-center justify-end space-x-2">
+            <Link href="/events/create">
+                <Button variant="ghost" size="icon">
+                    <PlusSquare className="h-5 w-5" />
+                    <span className="sr-only">Create Event</span>
+                </Button>
+            </Link>
             <UserNav />
         </div>
       </div>
