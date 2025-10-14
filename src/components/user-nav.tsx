@@ -32,7 +32,6 @@ export function UserNav() {
     return (
       <div className="flex items-center gap-2">
         <Skeleton className="h-10 w-10 rounded-full" />
-        <Skeleton className="h-10 w-10" />
       </div>
     )
   }
@@ -46,7 +45,6 @@ export function UserNav() {
             <span className="sr-only">Login</span>
           </Button>
         </Link>
-        <ThemeToggle />
       </div>
     );
   }
@@ -61,7 +59,6 @@ export function UserNav() {
           </Avatar>
         </Button>
       </Link>
-      <ThemeToggle />
     </div>
   )
 }
