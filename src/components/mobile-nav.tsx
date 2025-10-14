@@ -12,9 +12,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
+import { useUser } from "@/firebase/auth/use-user"
 
 // A mock hook, in a real app this would come from an auth provider
-const useAuth = () => ({
+const useMockAuth = () => ({
   user: { role: 'admin' } // or 'user'
 });
 
@@ -22,7 +23,11 @@ const useAuth = () => ({
 export function MobileNav() {
   const [open, setOpen] = React.useState(false)
   const pathname = usePathname();
-  const { user } = useAuth();
+  // const { user } = useMockAuth();
+  const { user: authUser } = useUser();
+
+  // For now, let's keep the mock role for admin to show the admin link
+  const mockUser = useMockAuth().user;
 
   const routes = [
     {
@@ -35,7 +40,7 @@ export function MobileNav() {
       label: 'Create Event',
       active: pathname === '/events/create',
     },
-    ...(user.role === 'admin' ? [{
+    ...(mockUser.role === 'admin' ? [{
       href: '/admin',
       label: 'Admin',
       active: pathname === '/admin',

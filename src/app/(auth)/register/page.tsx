@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link"
-import { BookMarked } from "lucide-react"
+import { useRouter } from "next/navigation";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,8 +14,48 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from "@/firebase";
+import { useToast } from "@/hooks/use-toast";
+import React from "react";
 
 export default function RegisterPage() {
+  const auth = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleEmailSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!auth) return;
+    const email = e.currentTarget.email.value;
+    const password = e.currentTarget.password.value;
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      router.push("/events");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: error.message || "Could not create account.",
+      });
+    }
+  };
+  
+    const handleGoogleSignIn = async () => {
+    if (!auth) return;
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      router.push("/events");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: error.message || "Could not sign in with Google.",
+      });
+    }
+  };
+
+
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
@@ -22,15 +65,16 @@ export default function RegisterPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
+        <form onSubmit={handleEmailSignUp} className="grid gap-4">
           <div className="grid gap-2">
               <Label htmlFor="full-name">Full name</Label>
-              <Input id="full-name" placeholder="Jane Doe" required />
+              <Input id="full-name" name="fullName" placeholder="Jane Doe" required />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
+              name="email"
               type="email"
               placeholder="m@example.com"
               required
@@ -38,14 +82,25 @@ export default function RegisterPage() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" />
+            <Input id="password" name="password" type="password" />
           </div>
-          <Link href="/events" className="w-full">
-            <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:opacity-90 transition-opacity">
-              Create an account
-            </Button>
-          </Link>
-        </div>
+          <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:opacity-90 transition-opacity">
+            Create an account
+          </Button>
+        </form>
+         <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+            Sign up with Google
+          </Button>
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}
           <Link href="/login" className="underline">
