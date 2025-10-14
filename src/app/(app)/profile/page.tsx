@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,7 +47,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Camera } from "lucide-react";
+import { Camera, Trash2 } from "lucide-react";
 import { ImageCropper } from "@/components/image-cropper";
 import { uploadImage } from "@/lib/cloudinary";
 
@@ -165,6 +166,37 @@ export default function ProfilePage() {
       }
     }
   };
+
+  const handleRemovePhoto = async () => {
+    if (!user || !userDocRef) return;
+    setIsUploading(true);
+    try {
+      const photoURL = null;
+      // Update auth profile
+      if (auth?.currentUser) {
+        await updateProfile(auth.currentUser, { photoURL });
+      }
+      
+      // Update firestore
+      await setDoc(userDocRef, { photoURL }, { merge: true });
+      
+      // Force a re-render/re-fetch of user to get new photoURL
+      setUser({ ...user, photoURL: null });
+
+      toast({
+        title: "Profile Photo Removed",
+        description: "Your profile photo has been removed.",
+      });
+    } catch (error) {
+       toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "Could not remove your profile photo. Please try again.",
+      });
+    } finally {
+        setIsUploading(false);
+    }
+  }
   
   const onSubmit = async (data: ProfileFormValues) => {
     if (!userDocRef) return;
@@ -291,34 +323,66 @@ export default function ProfilePage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-6">
-              <div className="relative">
+              <div className="relative group">
                 <Avatar className="h-24 w-24 border-4 border-primary">
                   <AvatarImage src={user.photoURL || undefined} alt={user.displayName || ""} />
                   <AvatarFallback className="text-3xl">
                     {user.displayName ? user.displayName.charAt(0) : user.email?.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={onFileChange}
-                  className="hidden"
-                  accept="image/png, image/jpeg"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute bottom-0 right-0 rounded-full h-8 w-8 bg-muted/80 hover:bg-muted"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                >
-                  <Camera className="h-4 w-4" />
-                </Button>
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={onFileChange}
+                    className="hidden"
+                    accept="image/png, image/jpeg"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full h-10 w-10 text-white hover:bg-white/20 hover:text-white"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    title="Change photo"
+                  >
+                    <Camera className="h-5 w-5" />
+                  </Button>
+                   {user.photoURL && (
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                           <Button
+                              variant="ghost"
+                              size="icon"
+                              className="rounded-full h-10 w-10 text-white hover:bg-white/20 hover:text-white"
+                              disabled={isUploading}
+                              title="Remove photo"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Remove Profile Photo?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to remove your profile photo? This cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleRemovePhoto}>
+                              Yes, Remove
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                  )}
+                </div>
               </div>
               <div>
                 <CardTitle className="text-3xl font-headline">{form.watch('displayName') || 'User'}</CardTitle>
                 <p className="text-muted-foreground">{user.email}</p>
-                 {isUploading && <p className="text-sm text-muted-foreground animate-pulse">Uploading...</p>}
+                 {isUploading && <p className="text-sm text-muted-foreground animate-pulse">Updating photo...</p>}
               </div>
             </div>
           </CardHeader>
@@ -483,3 +547,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
