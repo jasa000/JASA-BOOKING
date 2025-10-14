@@ -1,14 +1,14 @@
 
 export const cloudinaryConfig = {
-  cloudName: "dfiucy0af",
-  uploadPreset: "booking_unsigned",
-  endpoint: "https://api.cloudinary.com/v1_1/dfiucy0af/image/upload",
+  cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
+  endpoint: `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
 };
 
 export const uploadImage = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("upload_preset", cloudinaryConfig.uploadPreset);
+  formData.append("upload_preset", cloudinaryConfig.uploadPreset!);
 
   try {
     const response = await fetch(cloudinaryConfig.endpoint, {
