@@ -1,3 +1,4 @@
+
 import { initializeApp, getApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
@@ -8,6 +9,12 @@ let auth: Auth;
 let firestore: Firestore;
 
 function initializeFirebase() {
+  if (!firebaseConfig.apiKey) {
+    console.error("Firebase API key is missing. Please add it to your environment variables.");
+    // @ts-ignore
+    return { firebaseApp: null, auth: null, firestore: null };
+  }
+
   if (getApps().length === 0) {
     firebaseApp = initializeApp(firebaseConfig);
   } else {
@@ -24,5 +31,3 @@ export * from './provider';
 export * from './auth/use-user';
 export * from './firestore/use-doc';
 export * from './firestore/use-collection';
-
-    
