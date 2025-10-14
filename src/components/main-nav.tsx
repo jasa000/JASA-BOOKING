@@ -11,15 +11,13 @@ export function MainNav({
 }: React.HTMLAttributes<HTMLElement>) {
 
   return (
-    <div className="flex-1">
-      <nav
-        className={cn("flex items-center justify-center", className)}
-        {...props}
-      >
-        <Link href="/events" className="flex items-center space-x-2">
-          <span className="font-bold font-headline text-lg">JASA BOOKING</span>
-        </Link>
-      </nav>
-    </div>
+    <nav
+      className={cn("flex items-center", className)}
+      {...props}
+    >
+      <Link href="/events" className="flex items-center space-x-2">
+        <span className="font-bold font-headline text-lg">JASA BOOKING</span>
+      </Link>
+    </nav>
   )
 }
