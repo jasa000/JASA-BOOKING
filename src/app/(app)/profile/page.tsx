@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -29,7 +28,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
-import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +40,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { sendPasswordResetEmail, deleteUser } from "firebase/auth";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const profileFormSchema = z.object({
   displayName: z.string().min(2, "Name must be at least 2 characters."),
@@ -333,49 +337,60 @@ export default function ProfilePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Security</CardTitle>
-            <CardDescription>Manage your account security settings.</CardDescription>
+            <CardTitle>Security & Account Settings</CardTitle>
+            <CardDescription>Manage your password and account data.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-             <div className="flex items-center justify-between p-4 border rounded-md">
-                <div>
-                  <h3 className="font-medium">Password</h3>
-                  <p className="text-sm text-muted-foreground">Reset your password via email.</p>
-                </div>
-                 <Button variant="outline" onClick={handlePasswordReset}>Send Reset Link</Button>
-            </div>
+          <CardContent>
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>Password Reset</AccordionTrigger>
+                <AccordionContent>
+                  <div className="flex items-center justify-between p-4 border rounded-md">
+                      <div>
+                        <h3 className="font-medium">Password</h3>
+                        <p className="text-sm text-muted-foreground">Reset your password via email. Limited to one request per 6 hours.</p>
+                      </div>
+                      <Button variant="outline" onClick={handlePasswordReset}>Send Reset Link</Button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                <AccordionTrigger className="text-destructive">Danger Zone</AccordionTrigger>
+                <AccordionContent>
+                  <div className="p-4 border border-destructive/50 rounded-md bg-destructive/5">
+                      <h3 className="font-medium text-destructive">Delete Account</h3>
+                      <p className="text-sm text-destructive/80 mb-4">
+                          This action is permanent and cannot be undone.
+                      </p>
+                      <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                              <Button variant="destructive" disabled={isDeleting}>
+                                {isDeleting ? "Deleting..." : "Delete My Account"}
+                              </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete your account and remove your data from our servers. This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90">
+                                Yes, delete account
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </CardContent>
-          <CardFooter className="flex flex-col items-start gap-4 border-t border-destructive/50 pt-4 bg-destructive/5 rounded-b-lg">
-             <CardTitle className="text-destructive">Danger Zone</CardTitle>
-             <CardDescription className="text-destructive">
-                Deleting your account is a permanent action and cannot be undone.
-              </CardDescription>
-             <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button variant="destructive" disabled={isDeleting}>
-                      {isDeleting ? "Deleting..." : "Delete Account"}
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your account and remove your data from our servers.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90">
-                      Yes, delete account
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-          </CardFooter>
         </Card>
+
       </div>
     </div>
   );
 }
-
-    
