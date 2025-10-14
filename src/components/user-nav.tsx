@@ -13,6 +13,7 @@ import { useAuth } from "@/firebase"
 import { useRouter } from "next/navigation"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ThemeToggle } from "./theme-toggle"
+import { LogIn } from "lucide-react"
 
 export function UserNav() {
   const { user, loading } = useUser();
@@ -30,7 +31,7 @@ export function UserNav() {
   if (loading) {
     return (
       <div className="flex items-center gap-2">
-        <Skeleton className="h-10 w-28" />
+        <Skeleton className="h-10 w-10 rounded-full" />
         <Skeleton className="h-10 w-10" />
       </div>
     )
@@ -40,10 +41,10 @@ export function UserNav() {
     return (
       <div className="flex items-center gap-2">
         <Link href="/login">
-          <Button variant="outline" size="sm">Sign In</Button>
-        </Link>
-        <Link href="/register">
-          <Button size="sm">Sign Up</Button>
+          <Button variant="ghost" size="icon">
+            <LogIn className="h-5 w-5" />
+            <span className="sr-only">Login</span>
+          </Button>
         </Link>
         <ThemeToggle />
       </div>
