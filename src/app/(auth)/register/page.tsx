@@ -4,6 +4,9 @@ import Link from "next/link"
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword, GoogleAuthProvider, sendEmailVerification, signInWithPopup, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
+import React, { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import zxcvbn from "zxcvbn";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,20 +20,40 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth, useFirestore } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
-import React from "react";
+import { PasswordStrength } from "@/components/password-strength";
 
 export default function RegisterPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [strength, setStrength] = useState(0);
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    const result = zxcvbn(newPassword);
+    setStrength(result.score);
+  };
 
   const handleEmailSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!auth || !firestore) return;
+
+    if (strength < 2) {
+      toast({
+        variant: "destructive",
+        title: "Weak Password",
+        description: "Please choose a stronger password.",
+      });
+      return;
+    }
+
     const fullName = e.currentTarget.fullName.value;
     const email = e.currentTarget.email.value;
-    const password = e.currentTarget.password.value;
+    
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -111,7 +134,25 @@ export default function RegisterPage() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" />
+            <div className="relative">
+               <Input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={handlePasswordChange}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? <EyeOff /> : <Eye />}
+              </Button>
+            </div>
+             {password && <PasswordStrength score={strength} />}
           </div>
           <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:opacity-90 transition-opacity">
             Create an account

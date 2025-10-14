@@ -4,6 +4,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation";
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import React, { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 
 import { Button } from "@/components/ui/button"
@@ -18,13 +20,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth, useFirestore } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
-import React from "react";
 
 export default function LoginPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleRedirect = async (uid: string) => {
     if (!firestore) return;
@@ -128,7 +130,23 @@ export default function LoginPage() {
                 Forgot your password?
               </Link>
             </div>
-            <Input id="password" type="password" name="password" required />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                required
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? <EyeOff /> : <Eye />}
+              </Button>
+            </div>
           </div>
           <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:opacity-90 transition-opacity">
             Login
