@@ -19,11 +19,12 @@ import Link from "next/link"
 
 // A mock hook, in a real app this would come from an auth provider
 const useAuth = () => ({
-  user: {
-    name: "Admin User",
-    email: "admin@jasa.com",
-    avatarUrl: "https://i.pravatar.cc/150?u=admin",
-  }
+  user: null
+  // user: {
+  //   name: "Admin User",
+  //   email: "admin@jasa.com",
+  //   avatarUrl: "https://i.pravatar.cc/150?u=admin",
+  // }
 });
 
 
@@ -33,7 +34,7 @@ export function UserNav() {
   if (!user) {
     return (
       <Link href="/login">
-        <Button>Login</Button>
+        <Button>Sign up / Sign in</Button>
       </Link>
     );
   }
