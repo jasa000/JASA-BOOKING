@@ -11,9 +11,10 @@ import { useUser } from "@/firebase/auth/use-user"
 import { signOut } from "firebase/auth"
 import { useAuth } from "@/firebase"
 import { useRouter } from "next/navigation"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function UserNav() {
-  const { user } = useUser();
+  const { user, loading } = useUser();
   const auth = useAuth();
   const router = useRouter();
 
@@ -24,6 +25,10 @@ export function UserNav() {
       });
     }
   };
+
+  if (loading) {
+    return <Skeleton className="h-10 w-28" />;
+  }
 
   if (!user) {
     return (
