@@ -1,0 +1,106 @@
+import type { User, Event } from '@/lib/types';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+
+export const users: User[] = [
+  { id: '1', name: 'Admin User', email: 'admin@jasa.com', avatarUrl: 'https://i.pravatar.cc/150?u=admin', role: 'admin' },
+  { id: '2', name: 'Jane Doe', email: 'jane.doe@example.com', avatarUrl: 'https://i.pravatar.cc/150?u=jane', role: 'user' },
+];
+
+export const events: Event[] = [
+  {
+    id: '1',
+    title: 'Global Tech Summit 2024',
+    description: 'Join innovators and leaders from around the world to discuss the future of technology. A three-day event full of insights, networking, and groundbreaking announcements.',
+    date: '2024-10-22T09:00:00',
+    location: 'Silicon Valley, CA',
+    organizer: 'TechVision Inc.',
+    imageUrl: PlaceHolderImages[0].imageUrl,
+    imageHint: PlaceHolderImages[0].imageHint,
+    status: 'approved',
+    category: 'Technology'
+  },
+  {
+    id: '2',
+    title: 'Sunset Music Fest',
+    description: 'Experience three days of incredible music from a diverse lineup of artists. Set against a beautiful sunset backdrop, it\'s the perfect summer festival.',
+    date: '2024-08-15T16:00:00',
+    location: 'Oceanfront Park, Miami, FL',
+    organizer: 'Groove Productions',
+    imageUrl: PlaceHolderImages[1].imageUrl,
+    imageHint: PlaceHolderImages[1].imageHint,
+    status: 'approved',
+    category: 'Music'
+  },
+  {
+    id: '3',
+    title: 'Advanced React Workshop',
+    description: 'A deep dive into advanced React patterns, performance optimization, and hooks. This hands-on workshop is for experienced developers looking to level up their skills.',
+    date: '2024-09-05T10:00:00',
+    location: 'Online',
+    organizer: 'CodeMasters',
+    imageUrl: PlaceHolderImages[2].imageUrl,
+    imageHint: PlaceHolderImages[2].imageHint,
+    status: 'approved',
+    category: 'Workshop'
+  },
+  {
+    id: '4',
+    title: 'Future of Business Seminar',
+    description: 'Explore emerging trends in business, from AI integration to sustainable practices. Network with C-level executives and thought leaders.',
+    date: '2024-11-12T09:30:00',
+    location: 'Metropolis Convention Center',
+    organizer: 'Innovate Corp',
+    imageUrl: PlaceHolderImages[3].imageUrl,
+    imageHint: PlaceHolderImages[3].imageHint,
+    status: 'pending',
+    category: 'Business'
+  },
+  {
+    id: '5',
+    title: 'Community Picnic & Fun Day',
+    description: 'A fun-filled day for the whole family at the local park. Games, food trucks, and live music. A great way to connect with your neighbors.',
+    date: '2024-07-20T11:00:00',
+    location: 'Central Park, Springfield',
+    organizer: 'Springfield Community Council',
+    imageUrl: PlaceHolderImages[4].imageUrl,
+    imageHint: PlaceHolderImages[4].imageHint,
+    status: 'approved',
+    category: 'Community'
+  },
+  {
+    id: '6',
+    title: 'Modern Art Exhibition: "Dimensions"',
+    description: 'Discover the latest works from groundbreaking contemporary artists in this stunning exhibition. "Dimensions" explores the intersection of space and form.',
+    date: '2024-09-01T10:00:00',
+    location: 'The Modern Gallery',
+    organizer: 'ArtHouse Curations',
+    imageUrl: PlaceHolderImages[5].imageUrl,
+    imageHint: PlaceHolderImages[5].imageHint,
+    status: 'approved',
+    category: 'Arts'
+  },
+  {
+    id: '7',
+    title: 'Startup Pitch Night',
+    description: 'Watch the next generation of entrepreneurs pitch their ideas to a panel of venture capitalists. Your chance to see the next big thing before it happens.',
+    date: '2024-08-28T18:00:00',
+    location: 'The Innovation Hub',
+    organizer: 'Venture Forward',
+    imageUrl: PlaceHolderImages[6].imageUrl,
+    imageHint: PlaceHolderImages[6].imageHint,
+    status: 'pending',
+    category: 'Business'
+  },
+  {
+    id: '8',
+    title: 'Mindful Morning Yoga',
+    description: 'Start your weekend with a refreshing and centering yoga session. All levels are welcome to join this peaceful practice.',
+    date: '2024-07-27T08:00:00',
+    location: 'Seaside Pavilion',
+    organizer: 'ZenFlow Yoga',
+    imageUrl: PlaceHolderImages[7].imageUrl,
+    imageHint: PlaceHolderImages[7].imageHint,
+    status: 'approved',
+    category: 'Wellness'
+  },
+];

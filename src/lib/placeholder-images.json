@@ -1,3 +1,52 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "1",
+      "description": "A vibrant tech conference with people networking.",
+      "imageUrl": "https://picsum.photos/seed/tech-conf/600/400",
+      "imageHint": "conference technology"
+    },
+    {
+      "id": "2",
+      "description": "An outdoor music festival at sunset.",
+      "imageUrl": "https://picsum.photos/seed/music-fest/600/400",
+      "imageHint": "music festival"
+    },
+    {
+      "id": "3",
+      "description": "A quiet and focused coding workshop.",
+      "imageUrl": "https://picsum.photos/seed/code-workshop/600/400",
+      "imageHint": "coding workshop"
+    },
+    {
+      "id": "4",
+      "description": "A professional business seminar in a modern hall.",
+      "imageUrl": "https://picsum.photos/seed/biz-seminar/600/400",
+      "imageHint": "business seminar"
+    },
+    {
+      "id": "5",
+      "description": "A local community gathering in a park.",
+      "imageUrl": "https://picsum.photos/seed/community-meet/600/400",
+      "imageHint": "community park"
+    },
+    {
+      "id": "6",
+      "description": "An art exhibition with modern paintings.",
+      "imageUrl": "https://picsum.photos/seed/art-exhibit/600/400",
+      "imageHint": "art gallery"
+    },
+    {
+      "id": "7",
+      "description": "A startup pitch competition on a stage.",
+      "imageUrl": "https://picsum.photos/seed/startup-pitch/600/400",
+      "imageHint": "startup stage"
+    },
+    {
+      "id": "8",
+      "description": "A yoga and wellness retreat in a serene location.",
+      "imageUrl": "https://picsum.photos/seed/yoga-retreat/600/400",
+      "imageHint": "yoga wellness"
+    }
+  ]
 }
