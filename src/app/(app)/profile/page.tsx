@@ -1,12 +1,20 @@
+
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useUser, useDoc, useFirestore } from "@/firebase";
+import { useUser, useDoc, useFirestore, useAuth } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -21,6 +29,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
+import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { sendPasswordResetEmail, deleteUser } from "firebase/auth";
 
 const profileFormSchema = z.object({
   displayName: z.string().min(2, "Name must be at least 2 characters."),
@@ -35,10 +56,12 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function ProfilePage() {
   const { user, loading: userLoading } = useUser();
+  const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   const userDocRef = React.useMemo(() => {
     if (!firestore || !user) return null;
@@ -71,14 +94,14 @@ export default function ProfilePage() {
           altEmail: userProfile.altEmail || "",
         });
       } else if (!profileLoading) {
-          form.reset({
-              displayName: user.displayName || "",
-              mobileNumber: "",
-              altMobileNumber: "",
-              schoolOrCollege: "",
-              address: "",
-              altEmail: "",
-          })
+        form.reset({
+          displayName: user.displayName || "",
+          mobileNumber: "",
+          altMobileNumber: "",
+          schoolOrCollege: "",
+          address: "",
+          altEmail: "",
+        });
       }
     }
   }, [user, userProfile, profileLoading, form]);
@@ -99,7 +122,65 @@ export default function ProfilePage() {
         description: "Could not update your profile. Please try again.",
       });
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!user || !user.email) return;
+
+    const lastRequest = localStorage.getItem("passwordResetRequest");
+    const sixHours = 6 * 60 * 60 * 1000;
+    if (lastRequest && Date.now() - parseInt(lastRequest) < sixHours) {
+      toast({
+        variant: "destructive",
+        title: "Rate limit exceeded",
+        description: "You can only request a password reset once every 6 hours.",
+      });
+      return;
+    }
+
+    if (!auth) return;
+    try {
+      await sendPasswordResetEmail(auth, user.email);
+      localStorage.setItem("passwordResetRequest", Date.now().toString());
+      toast({
+        title: "Password Reset Email Sent",
+        description: "Please check your inbox to reset your password.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Failed to send reset email.",
+        description: error.message,
+      });
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user || !userDocRef) return;
+    setIsDeleting(true);
+    try {
+      // First delete firestore doc
+      await deleteDoc(userDocRef);
+      // Then delete auth user
+      if (auth?.currentUser?.uid === user.uid) {
+         await deleteUser(auth.currentUser);
+      } else {
+        throw new Error("User not authenticated for this action.");
+      }
+      toast({
+        title: "Account Deleted",
+        description: "Your account has been permanently deleted.",
+      });
+      router.push("/");
+    } catch (error: any) {
+      setIsDeleting(false);
+      toast({
+        variant: "destructive",
+        title: "Failed to delete account.",
+        description: error.message,
+      });
     }
   };
 
@@ -108,19 +189,19 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-         <Card>
-            <CardHeader>
-                <CardTitle>Edit Profile</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <Skeleton className="h-24 w-24 rounded-full" />
-                <div className="space-y-2">
-                    <Skeleton className="h-8 w-full" />
-                    <Skeleton className="h-8 w-full" />
-                    <Skeleton className="h-8 w-full" />
-                </div>
-            </CardContent>
-         </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Edit Profile</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-24 w-24 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -132,72 +213,72 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto space-y-8">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-4">
-               <Avatar className="h-24 w-24 border-4 border-primary">
+              <Avatar className="h-24 w-24 border-4 border-primary">
                 <AvatarImage src={user.photoURL || undefined} alt={user.displayName || ""} />
                 <AvatarFallback className="text-3xl">
-                    {user.displayName ? user.displayName.charAt(0) : user.email?.charAt(0)}
+                  {user.displayName ? user.displayName.charAt(0) : user.email?.charAt(0)}
                 </AvatarFallback>
-                </Avatar>
-                <div>
-                    <CardTitle className="text-3xl font-headline">{form.watch('displayName') || 'User'}</CardTitle>
-                    <p className="text-muted-foreground">{user.email}</p>
-                </div>
+              </Avatar>
+              <div>
+                <CardTitle className="text-3xl font-headline">{form.watch('displayName') || 'User'}</CardTitle>
+                <p className="text-muted-foreground">{user.email}</p>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
+                  <FormField
                     control={form.control}
                     name="displayName"
                     render={({ field }) => (
-                        <FormItem>
+                      <FormItem>
                         <FormLabel>Full Name</FormLabel>
                         <FormControl>
-                            <Input placeholder="Jane Doe" {...field} />
+                          <Input placeholder="Jane Doe" {...field} />
                         </FormControl>
                         <FormMessage />
-                        </FormItem>
+                      </FormItem>
                     )}
-                    />
-                    <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <Input value={user.email || ""} readOnly disabled className="cursor-not-allowed"/>
-                    </FormItem>
+                  />
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <Input value={user.email || ""} readOnly disabled className="cursor-not-allowed" />
+                  </FormItem>
                 </div>
-                
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
                     control={form.control}
                     name="mobileNumber"
                     render={({ field }) => (
-                        <FormItem>
+                      <FormItem>
                         <FormLabel>Mobile Number</FormLabel>
                         <FormControl>
-                            <Input placeholder="e.g. +1 234 567 890" {...field} />
+                          <Input placeholder="e.g. +1 234 567 890" {...field} />
                         </FormControl>
                         <FormMessage />
-                        </FormItem>
+                      </FormItem>
                     )}
-                    />
-                    <FormField
+                  />
+                  <FormField
                     control={form.control}
                     name="altMobileNumber"
                     render={({ field }) => (
-                        <FormItem>
+                      <FormItem>
                         <FormLabel>Alternative Mobile Number</FormLabel>
                         <FormControl>
-                            <Input placeholder="e.g. +1 987 654 321" {...field} />
+                          <Input placeholder="e.g. +1 987 654 321" {...field} />
                         </FormControl>
                         <FormMessage />
-                        </FormItem>
+                      </FormItem>
                     )}
-                    />
+                  />
                 </div>
 
                 <FormField
@@ -213,7 +294,7 @@ export default function ProfilePage() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="address"
@@ -235,7 +316,7 @@ export default function ProfilePage() {
                     <FormItem>
                       <FormLabel>Alternative Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. personal@example.com" {...field} value={field.value ?? ''}/>
+                        <Input placeholder="e.g. personal@example.com" {...field} value={field.value ?? ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -248,6 +329,49 @@ export default function ProfilePage() {
               </form>
             </Form>
           </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Security</CardTitle>
+            <CardDescription>Manage your account security settings.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+             <div className="flex items-center justify-between p-4 border rounded-md">
+                <div>
+                  <h3 className="font-medium">Password</h3>
+                  <p className="text-sm text-muted-foreground">Reset your password via email.</p>
+                </div>
+                 <Button variant="outline" onClick={handlePasswordReset}>Send Reset Link</Button>
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col items-start gap-4 border-t border-destructive/50 pt-4 bg-destructive/5 rounded-b-lg">
+             <CardTitle className="text-destructive">Danger Zone</CardTitle>
+             <CardDescription className="text-destructive">
+                Deleting your account is a permanent action and cannot be undone.
+              </CardDescription>
+             <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" disabled={isDeleting}>
+                      {isDeleting ? "Deleting..." : "Delete Account"}
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90">
+                      Yes, delete account
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+          </CardFooter>
         </Card>
       </div>
     </div>
