@@ -321,8 +321,7 @@ export default function ProfilePage() {
       />
       <div className="max-w-3xl mx-auto space-y-8">
         <Card>
-          <CardHeader>
-            <div className="flex items-center gap-6">
+          <CardHeader className="items-center">
               <div className="relative group">
                 <Avatar className="h-24 w-24 border-4 border-primary">
                   <AvatarImage src={user.photoURL || undefined} alt={user.displayName || ""} />
@@ -378,13 +377,8 @@ export default function ProfilePage() {
                       </AlertDialog>
                   )}
                 </div>
+                 {isUploading && <p className="text-sm text-muted-foreground animate-pulse absolute -bottom-6">Updating photo...</p>}
               </div>
-              <div>
-                <CardTitle className="text-3xl font-headline">{form.watch('displayName') || 'User'}</CardTitle>
-                <p className="text-muted-foreground">{user.email}</p>
-                 {isUploading && <p className="text-sm text-muted-foreground animate-pulse">Updating photo...</p>}
-              </div>
-            </div>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -547,5 +541,7 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
 
     
