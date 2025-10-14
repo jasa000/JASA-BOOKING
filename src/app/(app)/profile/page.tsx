@@ -50,6 +50,7 @@ import {
 import { Camera, Trash2 } from "lucide-react";
 import { ImageCropper } from "@/components/image-cropper";
 import { uploadImage } from "@/lib/cloudinary";
+import { formatDistanceToNowStrict } from "date-fns";
 
 
 const profileFormSchema = z.object({
@@ -63,6 +64,8 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
+const SIX_HOURS_IN_MS = 6 * 60 * 60 * 1000;
+
 export default function ProfilePage() {
   const { user, loading: userLoading, setUser } = useUser();
   const auth = useAuth();
@@ -75,6 +78,9 @@ export default function ProfilePage() {
   const [imageToCrop, setImageToCrop] = React.useState<string | null>(null);
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const [resetCooldown, setResetCooldown] = React.useState(0);
+  const [cooldownDisplay, setCooldownDisplay] = React.useState("");
 
   const userDocRef = React.useMemo(() => {
     if (!firestore || !user) return null;
@@ -94,6 +100,43 @@ export default function ProfilePage() {
       altEmail: "",
     },
   });
+  
+  React.useEffect(() => {
+    const lastRequest = localStorage.getItem("passwordResetRequest");
+    if (lastRequest) {
+      const remainingTime = (parseInt(lastRequest) + SIX_HOURS_IN_MS) - Date.now();
+      if (remainingTime > 0) {
+        setResetCooldown(Math.ceil(remainingTime / 1000));
+      }
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (resetCooldown <= 0) {
+      setCooldownDisplay("");
+      return;
+    };
+
+    const intervalId = setInterval(() => {
+      setResetCooldown(prev => {
+        if (prev <= 1) {
+          clearInterval(intervalId);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [resetCooldown]);
+
+  React.useEffect(() => {
+    if (resetCooldown > 0) {
+      const futureDate = new Date(Date.now() + resetCooldown * 1000);
+      setCooldownDisplay(formatDistanceToNowStrict(futureDate));
+    }
+  }, [resetCooldown]);
+
 
   React.useEffect(() => {
     if (user) {
@@ -223,23 +266,22 @@ export default function ProfilePage() {
   };
 
   const handlePasswordReset = async () => {
-    if (!user || !user.email) return;
-
-    const lastRequest = localStorage.getItem("passwordResetRequest");
-    const sixHours = 6 * 60 * 60 * 1000;
-    if (lastRequest && Date.now() - parseInt(lastRequest) < sixHours) {
-      toast({
+    if (!user || !user.email || !auth) return;
+    
+    if (resetCooldown > 0) {
+       toast({
         variant: "destructive",
         title: "Rate limit exceeded",
-        description: "You can only request a password reset once every 6 hours.",
+        description: `You can request another password reset in ${cooldownDisplay}.`,
       });
       return;
     }
 
-    if (!auth) return;
     try {
       await sendPasswordResetEmail(auth, user.email);
-      localStorage.setItem("passwordResetRequest", Date.now().toString());
+      const requestTime = Date.now();
+      localStorage.setItem("passwordResetRequest", requestTime.toString());
+      setResetCooldown(Math.ceil(SIX_HOURS_IN_MS / 1000));
       toast({
         title: "Password Reset Email Sent",
         description: "Please check your inbox to reset your password.",
@@ -497,7 +539,9 @@ export default function ProfilePage() {
                         <h3 className="font-medium">Password</h3>
                         <p className="text-sm text-muted-foreground">Reset your password via email. Limited to one request per 6 hours.</p>
                       </div>
-                      <Button variant="outline" onClick={handlePasswordReset}>Send Reset Link</Button>
+                      <Button variant="outline" onClick={handlePasswordReset} disabled={resetCooldown > 0}>
+                        {resetCooldown > 0 ? `Try again in ${cooldownDisplay}`: "Send Reset Link"}
+                      </Button>
                   </div>
                 </AccordionContent>
               </AccordionItem>
