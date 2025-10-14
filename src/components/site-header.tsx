@@ -10,7 +10,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        <div className="flex flex-1 items-center space-x-2">
+        <div className="flex items-center space-x-2">
           <Link href="/">
             <Button variant="ghost" size="icon">
               <Home className="h-5 w-5" />
@@ -20,7 +20,7 @@ export function SiteHeader() {
           <ThemeToggle />
         </div>
         <MainNav />
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex items-center justify-end space-x-2">
             <Link href="/events/create">
                 <Button variant="ghost" size="icon">
                     <PlusSquare className="h-5 w-5" />

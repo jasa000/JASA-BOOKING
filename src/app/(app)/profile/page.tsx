@@ -1,26 +1,53 @@
+"use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { events, users } from "@/lib/data";
+import { events } from "@/lib/data";
 import { EventCard } from "@/components/event-card";
-import { User, Mail } from "lucide-react";
+import { Mail, User as UserIcon } from "lucide-react";
+import { useUser } from "@/firebase";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
-  const user = users.find(u => u.role === 'admin'); // Mock: get the admin user
-  const registeredEvents = events.slice(0, 3); // Mock: user is registered for first 3 events
+  const { user, loading } = useUser();
+  const router = useRouter();
 
-  if (!user) return null;
+  // Mock: user is registered for first 3 events
+  const registeredEvents = events.slice(0, 3); 
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8">
+          <Skeleton className="h-24 w-24 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    router.push("/login");
+    return null;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8">
         <Avatar className="h-24 w-24 border-4 border-primary">
-          <AvatarImage src={user.avatarUrl} alt={user.name} />
-          <AvatarFallback className="text-3xl">{user.name.charAt(0)}</AvatarFallback>
+          <AvatarImage src={user.photoURL || undefined} alt={user.displayName || ""} />
+          <AvatarFallback className="text-3xl">
+            {user.displayName ? user.displayName.charAt(0) : user.email?.charAt(0)}
+          </AvatarFallback>
         </Avatar>
         <div>
-          <h1 className="text-3xl font-bold font-headline">{user.name}</h1>
+          <h1 className="text-3xl font-bold font-headline">{user.displayName || 'User'}</h1>
           <div className="flex items-center text-muted-foreground mt-1">
             <Mail className="h-4 w-4 mr-2" />
             <span>{user.email}</span>

@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation";
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+
 
 import { Button } from "@/components/ui/button"
 import {
@@ -14,21 +16,55 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useAuth } from "@/firebase";
+import { useAuth, useFirestore } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
 
 export default function LoginPage() {
   const auth = useAuth();
+  const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
 
+  const handleRedirect = async (uid: string) => {
+    if (!firestore) return;
+    const userDocRef = doc(firestore, "users", uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      if (userData.role === 'admin') {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
+    } else {
+      // Default redirect if doc doesn't exist for some reason
+      router.push("/");
+    }
+  };
+
   const handleGoogleSignIn = async () => {
-    if (!auth) return;
+    if (!auth || !firestore) return;
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-      router.push("/");
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Ensure user document exists
+       const userDocRef = doc(firestore, "users", user.uid);
+       const userDoc = await getDoc(userDocRef);
+       if (!userDoc.exists()) {
+          await setDoc(userDocRef, {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            role: 'user'
+          }, { merge: true });
+       }
+      
+      await handleRedirect(user.uid);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -45,7 +81,9 @@ export default function LoginPage() {
     const password = e.currentTarget.password.value;
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      if (!userCredential.user.emailVerified) {
+      const user = userCredential.user;
+
+      if (!user.emailVerified) {
         toast({
           variant: "destructive",
           title: "Email not verified",
@@ -53,7 +91,7 @@ export default function LoginPage() {
         });
         return;
       }
-      router.push("/");
+      await handleRedirect(user.uid);
     } catch (error: any) {
       toast({
         variant: "destructive",
