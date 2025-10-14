@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, sendEmailVerification, signInWithPopup } from "firebase/auth";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -29,8 +29,13 @@ export default function RegisterPage() {
     const email = e.currentTarget.email.value;
     const password = e.currentTarget.password.value;
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      router.push("/events");
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await sendEmailVerification(userCredential.user);
+      toast({
+        title: "Verification Email Sent",
+        description: "Please check your inbox to verify your email address.",
+      });
+      router.push("/login");
     } catch (error: any) {
       toast({
         variant: "destructive",

@@ -44,7 +44,15 @@ export default function LoginPage() {
     const email = e.currentTarget.email.value;
     const password = e.currentTarget.password.value;
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      if (!userCredential.user.emailVerified) {
+        toast({
+          variant: "destructive",
+          title: "Email not verified",
+          description: "Please check your inbox and verify your email address to log in.",
+        });
+        return;
+      }
       router.push("/events");
     } catch (error: any) {
       toast({
