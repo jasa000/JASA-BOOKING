@@ -40,7 +40,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { sendPasswordResetEmail, deleteUser, updateProfile } from "firebase/auth";
+import { sendPasswordResetEmail, deleteUser, updateProfile, signOut } from "firebase/auth";
 import {
   Accordion,
   AccordionContent,
@@ -296,7 +296,7 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!user || !userDocRef || !auth?.currentUser) return;
+    if (!user || !userDocRef || !auth?.currentUser || !auth) return;
     setIsDeleting(true);
     try {
       await deleteDoc(userDocRef);
@@ -309,11 +309,14 @@ export default function ProfilePage() {
       router.push("/");
     } catch (error: any) {
       if (error.code === 'auth/requires-recent-login') {
-        toast({
+         toast({
           variant: "destructive",
           title: "Action Required",
-          description: "This is a sensitive action. Please sign out and sign in again before deleting your account.",
-          duration: 8000,
+          description: "For your security, please log in again to confirm account deletion. Redirecting you now...",
+          duration: 5000,
+        });
+        signOut(auth).then(() => {
+            setTimeout(() => router.push("/login"), 1000);
         });
       } else {
         toast({
@@ -591,8 +594,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
-
-    
-
