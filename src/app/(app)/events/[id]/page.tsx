@@ -75,7 +75,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                 <Tag className="mr-3 h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-semibold">Category</p>
-                  <p className="text-muted-foreground"><Badge variant="secondary">{event.category}</Badge></p>
+                  <div className="text-muted-foreground"><Badge variant="secondary">{event.category}</Badge></div>
                 </div>
               </div>
             </CardContent>
