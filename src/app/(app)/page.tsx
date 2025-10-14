@@ -4,14 +4,7 @@ import { BookMarked, MoveRight } from "lucide-react";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="container z-40 bg-background">
-        <div className="flex h-20 items-center justify-center py-6">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="font-bold font-headline text-lg">JASA BOOKING</span>
-          </Link>
-        </div>
-      </header>
+    <>
       <main className="flex-1">
         <section className="relative">
            <div 
@@ -73,6 +66,6 @@ export default function HomePage() {
             </p>
         </div>
       </footer>
-    </div>
+    </>
   );
 }
