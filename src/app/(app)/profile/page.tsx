@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -100,6 +99,12 @@ export default function ProfilePage() {
       altEmail: "",
     },
   });
+
+  React.useEffect(() => {
+    if (!userLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, userLoading, router]);
   
   React.useEffect(() => {
     const lastRequest = localStorage.getItem("passwordResetRequest");
@@ -333,7 +338,7 @@ export default function ProfilePage() {
 
   const loading = userLoading || profileLoading;
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card>
@@ -351,11 +356,6 @@ export default function ProfilePage() {
         </Card>
       </div>
     );
-  }
-
-  if (!user) {
-    router.push("/login");
-    return null;
   }
 
   return (
