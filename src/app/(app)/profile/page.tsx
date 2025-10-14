@@ -296,31 +296,37 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!user || !userDocRef) return;
+    if (!user || !userDocRef || !auth?.currentUser) return;
     setIsDeleting(true);
     try {
-      // First delete firestore doc
       await deleteDoc(userDocRef);
-      // Then delete auth user
-      if (auth?.currentUser?.uid === user.uid) {
-         await deleteUser(auth.currentUser);
-      } else {
-        throw new Error("User not authenticated for this action.");
-      }
+      await deleteUser(auth.currentUser);
+
       toast({
         title: "Account Deleted",
         description: "Your account has been permanently deleted.",
       });
       router.push("/");
     } catch (error: any) {
+      if (error.code === 'auth/requires-recent-login') {
+        toast({
+          variant: "destructive",
+          title: "Action Required",
+          description: "This is a sensitive action. Please sign out and sign in again before deleting your account.",
+          duration: 8000,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Failed to delete account.",
+          description: error.message,
+        });
+      }
+    } finally {
       setIsDeleting(false);
-      toast({
-        variant: "destructive",
-        title: "Failed to delete account.",
-        description: error.message,
-      });
     }
   };
+
 
   const loading = userLoading || profileLoading;
 
@@ -589,3 +595,4 @@ export default function ProfilePage() {
     
 
     
+
