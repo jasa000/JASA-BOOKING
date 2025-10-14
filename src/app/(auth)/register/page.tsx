@@ -50,7 +50,7 @@ export default function RegisterPage() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      router.push("/events");
+      router.push("/");
     } catch (error: any) {
       toast({
         variant: "destructive",

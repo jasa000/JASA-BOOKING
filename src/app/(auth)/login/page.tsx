@@ -28,7 +28,7 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      router.push("/events");
+      router.push("/");
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -53,7 +53,7 @@ export default function LoginPage() {
         });
         return;
       }
-      router.push("/events");
+      router.push("/");
     } catch (error: any) {
       toast({
         variant: "destructive",
