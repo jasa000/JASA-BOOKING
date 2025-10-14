@@ -8,7 +8,6 @@ export default function HomePage() {
       <header className="container z-40 bg-background">
         <div className="flex h-20 items-center justify-between py-6">
           <Link href="/" className="flex items-center space-x-2">
-            <BookMarked className="h-6 w-6" />
             <span className="font-bold font-headline text-lg">JASA BOOKING</span>
           </Link>
           <nav>

@@ -43,7 +43,6 @@ export function MainNav({
       {...props}
     >
       <Link href="/events" className="flex items-center space-x-2">
-        <BookMarked className="h-6 w-6" />
         <span className="font-bold font-headline text-lg">JASA BOOKING</span>
       </Link>
       <div className="hidden md:flex items-center space-x-4 lg:space-x-6 ml-6">

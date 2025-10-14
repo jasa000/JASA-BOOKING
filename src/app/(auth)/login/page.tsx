@@ -16,9 +16,6 @@ export default function LoginPage() {
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
-        <div className="flex justify-center mb-4">
-           <BookMarked className="h-8 w-8" />
-        </div>
         <CardTitle className="text-2xl font-headline text-center">Login to JASA BOOKING</CardTitle>
         <CardDescription className="text-center">
           Enter your email below to login to your account

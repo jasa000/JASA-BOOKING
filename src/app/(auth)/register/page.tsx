@@ -16,9 +16,6 @@ export default function RegisterPage() {
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
-        <div className="flex justify-center mb-4">
-          <BookMarked className="h-8 w-8" />
-        </div>
         <CardTitle className="text-xl font-headline text-center">Create your JASA BOOKING Account</CardTitle>
         <CardDescription className="text-center">
           Enter your information to create an account
