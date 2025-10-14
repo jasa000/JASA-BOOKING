@@ -30,16 +30,13 @@ export default function EventsPage() {
 
   const approvedEventsQuery = useMemo(() => {
     if (!eventsCollectionRef) return null;
-    let q = query(
+    // Simplified query to avoid composite index requirement
+    return query(
       eventsCollectionRef,
       where('status', '==', 'approved'),
       orderBy('date', 'asc')
     );
-    if (categoryFilter !== 'all') {
-        q = query(q, where('category', '==', categoryFilter));
-    }
-    return q;
-  }, [eventsCollectionRef, categoryFilter]);
+  }, [eventsCollectionRef]);
 
   const {
     data: approvedEvents,
@@ -49,11 +46,14 @@ export default function EventsPage() {
   
   const filteredEvents = useMemo(() => {
     if (!approvedEvents) return [];
-    return approvedEvents.filter(event => 
-      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.location.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [approvedEvents, searchTerm]);
+    return approvedEvents.filter(event => {
+      const matchesCategory = categoryFilter === 'all' || event.category === categoryFilter;
+      const matchesSearch = 
+        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.location.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [approvedEvents, searchTerm, categoryFilter]);
 
   const categories = useMemo(() => {
     if (!approvedEvents) return [];
