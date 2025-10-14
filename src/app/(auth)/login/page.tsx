@@ -85,20 +85,33 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // Email verification is handled by Firebase rules for security, but client-side check is good UX
       if (!user.emailVerified) {
-        toast({
-          variant: "destructive",
+         toast({
+          variant: "default",
           title: "Email not verified",
           description: "Please check your inbox and verify your email address to log in.",
+          duration: 6000,
         });
+        // Don't sign out, let them see they are "logged in" but can't proceed
+        // This is a design choice. You could also signOut(auth) here.
         return;
       }
       await handleRedirect(user.uid);
     } catch (error: any) {
+      let description = "Could not sign in. Please check your credentials.";
+      if (error.code === 'auth/wrong-password') {
+        description = "Incorrect password. Please try again.";
+      } else if (error.code === 'auth/user-not-found') {
+        description = "No account found with this email address.";
+      } else if (error.code) {
+        description = error.message;
+      }
+      
       toast({
         variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: error.message || "Could not sign in.",
+        title: "Login Failed",
+        description,
       });
     }
   };

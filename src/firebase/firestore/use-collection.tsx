@@ -1,14 +1,15 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { onSnapshot, Query, QuerySnapshot, DocumentData, collection, getDocs, QueryDocumentSnapshot } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useState, useEffect, useMemo } from 'react';
+import { onSnapshot, Query, QuerySnapshot, DocumentData } from 'firebase/firestore';
 
 export const useCollection = <T extends DocumentData>(query: Query<T> | null) => {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  const queryPath = useMemo(() => query?.path, [query]);
 
   useEffect(() => {
     if (!query) {
@@ -34,9 +35,7 @@ export const useCollection = <T extends DocumentData>(query: Query<T> | null) =>
     );
 
     return () => unsubscribe();
-  }, [query?.path]);
+  }, [queryPath, query]);
 
   return { data, loading, error };
 };
-
-    

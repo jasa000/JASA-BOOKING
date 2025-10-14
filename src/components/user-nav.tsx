@@ -36,10 +36,19 @@ export function UserNav() {
     const fetchUserRole = async () => {
       if (user && firestore) {
         const userDocRef = doc(firestore, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          setUserRole(userDoc.data().role);
+        try {
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            setUserRole(userDoc.data().role);
+          } else {
+            setUserRole('user'); // Default to user if doc somehow doesn't exist
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          setUserRole('user');
         }
+      } else {
+        setUserRole(null);
       }
     };
     fetchUserRole();
@@ -104,7 +113,7 @@ export function UserNav() {
              <DropdownMenuItem asChild>
               <Link href="/admin">
                 <LayoutDashboard className="mr-2 h-4 w-4" />
-                Admin
+                Admin Dashboard
               </Link>
             </DropdownMenuItem>
           )}

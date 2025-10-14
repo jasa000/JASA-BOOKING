@@ -36,8 +36,9 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { events } from "@/lib/data"
 import { uploadImage } from "@/lib/cloudinary"
+import { useUser, useFirestore } from "@/firebase"
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -65,12 +66,15 @@ const formSchema = z.object({
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
       "Only .jpg, .jpeg, .png and .webp formats are supported."
-    ).optional(),
+    ),
 })
 
 export default function CreateEventPage() {
   const { toast } = useToast()
+  const { user } = useUser();
+  const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -82,43 +86,50 @@ export default function CreateEventPage() {
   
   const fileRef = form.register("image");
 
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!firestore || !user) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "You must be logged in to create an event.",
+      });
+      return;
+    }
     setIsSubmitting(true);
     try {
-      let imageUrl = "";
-      if (values.image) {
-        imageUrl = await uploadImage(values.image);
-      }
+      const imageUrl = await uploadImage(values.image);
 
-      const newEvent = {
+      const eventsCollection = collection(firestore, "events");
+      
+      await addDoc(eventsCollection, {
         ...values,
+        date: values.date.toISOString(),
         imageUrl,
-        id: (events.length + 1).toString(), 
+        organizer: user.displayName || user.email,
+        organizerId: user.uid,
         status: 'pending', 
-        organizer: 'Current User', // This should be replaced with actual user data
-        imageHint: values.title,
-      };
-
-      console.log("New Event Data:", newEvent)
+        imageHint: values.title.toLowerCase().split(" ").slice(0,2).join(" "),
+        createdAt: serverTimestamp(),
+      });
       
       toast({
         title: "Event Submitted!",
         description: "Your event has been sent for admin approval.",
       })
       form.reset();
-    } catch (error) {
+    } catch (error: any) {
        toast({
         variant: "destructive",
-        title: "Upload Failed",
-        description: "Could not upload image. Please try again.",
+        title: "Submission Failed",
+        description: error.message || "Could not create event. Please try again.",
       })
     } finally {
       setIsSubmitting(false);
     }
   }
   
-  const categories = [...new Set(events.map(event => event.category))];
+  // Example categories, you might fetch these from Firestore as well
+  const categories = ["Technology", "Music", "Workshop", "Business", "Community", "Arts", "Wellness"];
 
 
   return (
@@ -172,6 +183,9 @@ export default function CreateEventPage() {
                         <Input type="file" {...fileRef} className="flex-1"/>
                       </div>
                     </FormControl>
+                     <FormDescription>
+                      Upload a compelling image for your event (JPG, PNG, WebP, max 5MB).
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -222,7 +236,7 @@ export default function CreateEventPage() {
                             selected={field.value}
                             onSelect={field.onChange}
                             disabled={(date) =>
-                              date < new Date() || date < new Date("1900-01-01")
+                              date < new Date()
                             }
                             initialFocus
                           />
@@ -247,7 +261,7 @@ export default function CreateEventPage() {
                         </FormControl>
                         <SelectContent>
                           {categories.map(category => (
-                            <SelectItem key={category} value={category.toLowerCase()}>{category}</SelectItem>
+                            <SelectItem key={category} value={category}>{category}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
