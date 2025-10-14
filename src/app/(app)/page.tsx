@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 import { useCollection, useFirestore } from '@/firebase';
-import { collection, query, where, orderBy } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import React, { useState, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -30,11 +30,10 @@ export default function EventsPage() {
 
   const approvedEventsQuery = useMemo(() => {
     if (!eventsCollectionRef) return null;
-    // Simplified query to avoid composite index requirement
+    // Query only for status to avoid composite index. Sorting will be done client-side.
     return query(
       eventsCollectionRef,
-      where('status', '==', 'approved'),
-      orderBy('date', 'asc')
+      where('status', '==', 'approved')
     );
   }, [eventsCollectionRef]);
 
@@ -46,13 +45,18 @@ export default function EventsPage() {
   
   const filteredEvents = useMemo(() => {
     if (!approvedEvents) return [];
-    return approvedEvents.filter(event => {
-      const matchesCategory = categoryFilter === 'all' || event.category === categoryFilter;
-      const matchesSearch = 
-        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.location.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
+    
+    // Client-side filtering and sorting
+    return approvedEvents
+      .filter(event => {
+        const matchesCategory = categoryFilter === 'all' || event.category === categoryFilter;
+        const matchesSearch = 
+          event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          event.location.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCategory && matchesSearch;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
   }, [approvedEvents, searchTerm, categoryFilter]);
 
   const categories = useMemo(() => {
