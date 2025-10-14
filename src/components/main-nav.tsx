@@ -3,7 +3,6 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BookMarked } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 // A mock hook, in a real app this would come from an auth provider
@@ -38,29 +37,31 @@ export function MainNav({
   ];
 
   return (
-    <nav
-      className={cn("flex items-center space-x-4 lg:space-x-6", className)}
-      {...props}
-    >
-      <Link href="/events" className="flex items-center space-x-2">
-        <span className="font-bold font-headline text-lg">JASA BOOKING</span>
-      </Link>
-      <div className="hidden md:flex items-center space-x-4 lg:space-x-6 ml-6">
-        {routes.map((route) => (
-          <Link
-            key={route.href}
-            href={route.href}
-            className={cn(
-              "text-sm font-medium transition-colors hover:text-primary",
-              route.active
-                ? "text-black dark:text-white"
-                : "text-muted-foreground"
-            )}
-          >
-            {route.label}
-          </Link>
-        ))}
-      </div>
-    </nav>
+    <div className="flex-1">
+      <nav
+        className={cn("flex items-center justify-center space-x-4 lg:space-x-6", className)}
+        {...props}
+      >
+        <Link href="/events" className="flex items-center space-x-2">
+          <span className="font-bold font-headline text-lg">JASA BOOKING</span>
+        </Link>
+        <div className="hidden md:flex items-center space-x-4 lg:space-x-6 ml-6">
+          {routes.map((route) => (
+            <Link
+              key={route.href}
+              href={route.href}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-primary",
+                route.active
+                  ? "text-black dark:text-white"
+                  : "text-muted-foreground"
+              )}
+            >
+              {route.label}
+            </Link>
+          ))}
+        </div>
+      </nav>
+    </div>
   )
 }
