@@ -1,8 +1,17 @@
+
 export type User = {
   id: string;
   name: string;
   email: string;
   avatarUrl: string;
+  role: 'user' | 'admin';
+};
+
+export type UserProfile = {
+  uid: string;
+  email: string;
+  displayName?: string;
+  photoURL?: string;
   role: 'user' | 'admin';
 };
 

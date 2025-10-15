@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useUser } from '@/firebase/auth/use-user';
@@ -10,6 +11,7 @@ import {
   MenubarItem,
   MenubarMenu,
   MenubarTrigger,
+  MenubarSeparator,
 } from '@/components/ui/menubar';
 import Link from 'next/link';
 
@@ -50,6 +52,10 @@ export function AdminMenu() {
             <MenubarContent>
               <MenubarItem asChild>
                 <Link href="/admin">Pending Events</Link>
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem asChild>
+                <Link href="/admin/users">Manage Users</Link>
               </MenubarItem>
             </MenubarContent>
           </MenubarMenu>
