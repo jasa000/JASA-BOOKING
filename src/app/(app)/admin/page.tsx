@@ -70,13 +70,6 @@ export default function AdminPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold font-headline">Admin Dashboard</h1>
-        <p className="text-muted-foreground">
-          Review and approve user-submitted events.
-        </p>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle>Pending Events</CardTitle>
