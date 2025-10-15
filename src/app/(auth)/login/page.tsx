@@ -32,19 +32,16 @@ export default function LoginPage() {
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
 
   const handleRedirect = async (uid: string) => {
-    if (!firestore) return;
+    if (!firestore) {
+      router.push("/");
+      return;
+    }
     const userDocRef = doc(firestore, "users", uid);
     const userDoc = await getDoc(userDocRef);
 
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      if (userData.role === 'admin') {
-        router.push("/admin");
-      } else {
-        router.push("/");
-      }
+    if (userDoc.exists() && userDoc.data().role === 'admin') {
+      router.push("/admin");
     } else {
-      // Default redirect if doc doesn't exist for some reason
       router.push("/");
     }
   };
@@ -102,6 +99,7 @@ export default function LoginPage() {
         });
         // Don't sign out, let them see they are "logged in" but can't proceed
         // This is a design choice. You could also signOut(auth) here.
+        setIsSubmitting(false);
         return;
       }
       await handleRedirect(user.uid);
