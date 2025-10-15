@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link"
@@ -5,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword, GoogleAuthProvider, sendEmailVerification, signInWithPopup, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import zxcvbn from "zxcvbn";
 
 import { Button } from "@/components/ui/button"
@@ -30,6 +31,8 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [strength, setStrength] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.target.value;
@@ -50,7 +53,8 @@ export default function RegisterPage() {
       });
       return;
     }
-
+    
+    setIsSubmitting(true);
     const fullName = e.currentTarget.fullName.value;
     const email = e.currentTarget.email.value;
     
@@ -79,11 +83,14 @@ export default function RegisterPage() {
         title: "Uh oh! Something went wrong.",
         description: error.message || "Could not create account.",
       });
+    } finally {
+        setIsSubmitting(false);
     }
   };
   
     const handleGoogleSignIn = async () => {
     if (!auth || !firestore) return;
+    setIsGoogleSubmitting(true);
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
@@ -104,6 +111,8 @@ export default function RegisterPage() {
         title: "Uh oh! Something went wrong.",
         description: error.message || "Could not sign in with Google.",
       });
+    } finally {
+        setIsGoogleSubmitting(false);
     }
   };
 
@@ -120,7 +129,7 @@ export default function RegisterPage() {
         <form onSubmit={handleEmailSignUp} className="grid gap-4">
           <div className="grid gap-2">
               <Label htmlFor="full-name">Full name</Label>
-              <Input id="full-name" name="fullName" placeholder="Jane Doe" required />
+              <Input id="full-name" name="fullName" placeholder="Jane Doe" required disabled={isSubmitting || isGoogleSubmitting} />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
@@ -130,6 +139,7 @@ export default function RegisterPage() {
               type="email"
               placeholder="m@example.com"
               required
+              disabled={isSubmitting || isGoogleSubmitting}
             />
           </div>
           <div className="grid gap-2">
@@ -141,6 +151,7 @@ export default function RegisterPage() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={handlePasswordChange}
+                disabled={isSubmitting || isGoogleSubmitting}
               />
               <Button
                 type="button"
@@ -154,7 +165,8 @@ export default function RegisterPage() {
             </div>
              {password && <PasswordStrength score={strength} />}
           </div>
-          <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:opacity-90 transition-opacity">
+          <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:opacity-90 transition-opacity" disabled={isSubmitting || isGoogleSubmitting}>
+             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create an account
           </Button>
         </form>
@@ -168,7 +180,8 @@ export default function RegisterPage() {
               </span>
             </div>
           </div>
-          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isSubmitting || isGoogleSubmitting}>
+            {isGoogleSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Sign up with Google
           </Button>
         <div className="mt-4 text-center text-sm">

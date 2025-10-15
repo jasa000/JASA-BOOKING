@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link"
@@ -5,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 
 import { Button } from "@/components/ui/button"
@@ -27,6 +28,8 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
 
   const handleRedirect = async (uid: string) => {
     if (!firestore) return;
@@ -48,6 +51,7 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     if (!auth || !firestore) return;
+    setIsGoogleSubmitting(true);
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
@@ -73,12 +77,15 @@ export default function LoginPage() {
         title: "Uh oh! Something went wrong.",
         description: error.message || "Could not sign in with Google.",
       });
+    } finally {
+        setIsGoogleSubmitting(false);
     }
   };
   
   const handleEmailSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!auth) return;
+    setIsSubmitting(true);
     const email = e.currentTarget.email.value;
     const password = e.currentTarget.password.value;
     try {
@@ -113,6 +120,8 @@ export default function LoginPage() {
         title: "Login Failed",
         description,
       });
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -134,6 +143,7 @@ export default function LoginPage() {
               name="email"
               placeholder="m@example.com"
               required
+              disabled={isSubmitting || isGoogleSubmitting}
             />
           </div>
           <div className="grid gap-2">
@@ -149,6 +159,7 @@ export default function LoginPage() {
                 type={showPassword ? "text" : "password"}
                 name="password"
                 required
+                disabled={isSubmitting || isGoogleSubmitting}
               />
               <Button
                 type="button"
@@ -161,7 +172,8 @@ export default function LoginPage() {
               </Button>
             </div>
           </div>
-          <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:opacity-90 transition-opacity">
+          <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:opacity-90 transition-opacity" disabled={isSubmitting || isGoogleSubmitting}>
+             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Login
           </Button>
           <div className="relative">
@@ -175,7 +187,8 @@ export default function LoginPage() {
             </div>
           </div>
         </form>
-         <Button variant="outline" className="w-full mt-4" onClick={handleGoogleSignIn}>
+         <Button variant="outline" className="w-full mt-4" onClick={handleGoogleSignIn} disabled={isSubmitting || isGoogleSubmitting}>
+             {isGoogleSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Sign in with Google
           </Button>
         <div className="mt-4 text-center text-sm">
