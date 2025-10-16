@@ -381,10 +381,28 @@ export default function ProfilePage() {
       />
       <div className="max-w-3xl mx-auto space-y-8">
         <div className="flex justify-end">
-          <Button variant="outline" onClick={handleSignOut}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Log out
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline">
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  You will be returned to the homepage.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleSignOut}>
+                  Log out
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
         <Card>
           <CardHeader className="items-center">
@@ -621,5 +639,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
