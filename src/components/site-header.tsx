@@ -31,7 +31,7 @@ export function SiteHeader() {
             <UserNav />
         </div>
       </div>
-      <span className="absolute inset-0 animate-shine bg-gradient-to-r from-transparent via-accent/50 to-transparent opacity-75 z-0"></span>
+      <span className="absolute inset-0 animate-shine bg-gradient-to-r from-transparent via-gray-300/50 to-transparent opacity-75 dark:via-white/50 z-0"></span>
     </header>
   )
 }
