@@ -38,12 +38,21 @@ export function ThemeProvider({
   colorStorageKey = "ui-color-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(
-    () => (typeof window !== 'undefined' ? (localStorage.getItem(storageKey) as Theme) || defaultTheme : defaultTheme)
-  )
-  const [colorTheme, setColorTheme] = React.useState<ColorTheme>(
-    () => (typeof window !== 'undefined' ? (localStorage.getItem(colorStorageKey) as ColorTheme) || defaultColorTheme : defaultColorTheme)
-  )
+  const [theme, setTheme] = React.useState<Theme>(defaultTheme);
+  const [colorTheme, setColorTheme] = React.useState<ColorTheme>(defaultColorTheme);
+
+  React.useEffect(() => {
+    const storedTheme = localStorage.getItem(storageKey) as Theme | null;
+    const storedColorTheme = localStorage.getItem(colorStorageKey) as ColorTheme | null;
+    
+    if (storedTheme) {
+      setTheme(storedTheme);
+    }
+    if (storedColorTheme) {
+      setColorTheme(storedColorTheme);
+    }
+  }, [storageKey, colorStorageKey]);
+  
 
   React.useEffect(() => {
     const root = window.document.documentElement
@@ -99,5 +108,3 @@ export const useTheme = () => {
 
   return context
 }
-
-    
