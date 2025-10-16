@@ -45,21 +45,21 @@ export function AdminMenu() {
       <div className="container px-4 md:px-6">
         <Menubar className="border-none rounded-none h-12 justify-start">
           <MenubarMenu>
-            <Link href="/" passHref>
+            <Link href="/" legacyBehavior passHref>
               <MenubarTrigger asChild className="cursor-pointer">
                 <a>Dashboard</a>
               </MenubarTrigger>
             </Link>
           </MenubarMenu>
           <MenubarMenu>
-            <Link href="/admin" passHref>
+            <Link href="/admin" legacyBehavior passHref>
               <MenubarTrigger asChild className="cursor-pointer">
                 <a>Pending Events</a>
               </MenubarTrigger>
             </Link>
           </MenubarMenu>
           <MenubarMenu>
-            <Link href="/admin/users" passHref>
+            <Link href="/admin/users" legacyBehavior passHref>
               <MenubarTrigger asChild className="cursor-pointer">
                 <a>Manage Users</a>
               </MenubarTrigger>
