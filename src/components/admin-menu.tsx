@@ -7,13 +7,11 @@ import { useFirestore } from '@/firebase';
 import { useEffect, useState } from 'react';
 import {
   Menubar,
-  MenubarContent,
-  MenubarItem,
   MenubarMenu,
   MenubarTrigger,
-  MenubarSeparator,
 } from '@/components/ui/menubar';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export function AdminMenu() {
   const { user, loading } = useUser();
@@ -46,18 +44,20 @@ export function AdminMenu() {
   return (
     <div className="border-b bg-background">
       <div className="container px-4 md:px-6">
-        <Menubar className="border-none rounded-none h-12">
+        <Menubar className="border-none rounded-none h-12 justify-start">
           <MenubarMenu>
-            <MenubarTrigger>Dashboard</MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem asChild>
-                <Link href="/admin">Pending Events</Link>
-              </MenubarItem>
-              <MenubarSeparator />
-              <MenubarItem asChild>
-                <Link href="/admin/users">Manage Users</Link>
-              </MenubarItem>
-            </MenubarContent>
+             <Link href="/admin" passHref legacyBehavior>
+                <MenubarTrigger asChild className="cursor-pointer">
+                    <a>Pending Events</a>
+                </MenubarTrigger>
+             </Link>
+          </MenubarMenu>
+          <MenubarMenu>
+             <Link href="/admin/users" passHref legacyBehavior>
+                <MenubarTrigger asChild className="cursor-pointer">
+                    <a>Manage Users</a>
+                </MenubarTrigger>
+             </Link>
           </MenubarMenu>
         </Menubar>
       </div>
