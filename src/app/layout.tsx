@@ -1,13 +1,36 @@
-import type {Metadata} from 'next';
+
+"use client";
+
+import type { Metadata } from 'next';
 import './globals.css';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider, useTheme } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { cn } from '@/lib/utils';
 
-export const metadata: Metadata = {
-  title: 'JASA BOOKING',
-  description: 'Your one-stop platform for event booking and management.',
-};
+// This component now needs to be a client component to use the useTheme hook.
+// We wrap the main layout logic in a component that can access the theme context.
+function AppBody({ children }: { children: React.ReactNode }) {
+  const { theme, colorTheme } = useTheme();
+
+  return (
+    <body
+      className={cn(
+        'font-body antialiased min-h-screen bg-background',
+        // Apply gradient only for light themes other than zinc
+        theme !== 'dark' && colorTheme === 'blue' && 'bg-gradient-to-br from-blue-50 to-white',
+        theme !== 'dark' && colorTheme === 'green' && 'bg-gradient-to-br from-green-50 to-white',
+        theme !== 'dark' && colorTheme === 'rose' && 'bg-gradient-to-br from-rose-50 to-white'
+      )}
+    >
+      <FirebaseClientProvider>
+        {children}
+      </FirebaseClientProvider>
+      <Toaster />
+    </body>
+  );
+}
+
 
 export default function RootLayout({
   children,
@@ -22,18 +45,15 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased min-h-screen bg-background">
-        <ThemeProvider
+      <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
         >
-          <FirebaseClientProvider>
-            {children}
-          </FirebaseClientProvider>
-          <Toaster />
-        </ThemeProvider>
-      </body>
+        <AppBody>
+          {children}
+        </AppBody>
+      </ThemeProvider>
     </html>
   );
 }
