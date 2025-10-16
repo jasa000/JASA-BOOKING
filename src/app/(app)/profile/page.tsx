@@ -50,6 +50,7 @@ import { Camera, Trash2 } from "lucide-react";
 import { ImageCropper } from "@/components/image-cropper";
 import { uploadImage } from "@/lib/cloudinary";
 import { formatDistanceToNowStrict } from "date-fns";
+import { ThemeSelector } from "@/components/theme-selector";
 
 
 const profileFormSchema = z.object({
@@ -535,6 +536,18 @@ export default function ProfilePage() {
 
         <Card>
           <CardHeader>
+            <CardTitle>Appearance</CardTitle>
+            <CardDescription>
+              Customize the look and feel of the application.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ThemeSelector />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>Security & Account Settings</CardTitle>
             <CardDescription>Manage your password and account data.</CardDescription>
           </CardHeader>
@@ -594,3 +607,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
