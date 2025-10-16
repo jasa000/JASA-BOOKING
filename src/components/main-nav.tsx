@@ -19,7 +19,6 @@ export function MainNav({
       <Link href="/" className="flex items-center space-x-2">
         <span className="font-bold font-headline text-lg relative inline-block overflow-hidden">
           <span className="relative text-primary">JASA BOOKING</span>
-          <span className="absolute inset-0 animate-shine bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-75"></span>
         </span>
       </Link>
     </nav>
