@@ -79,8 +79,8 @@ const institutionFormSchema = z.object({
   state: z.string().min(1, 'Please select a state.'),
   district: z.string().min(1, 'Please select a district.'),
   address: z.string().min(10, 'Please provide a detailed address.'),
-  imageUrls: z.array(z.string()).min(1, 'Please upload at least one image.'),
-  mainImageUrl: z.string().min(1, 'Please select a main image.'),
+  imageUrls: z.array(z.string().url()).min(1, 'Please upload at least one image.'),
+  mainImageUrl: z.string().url().min(1, 'Please select a main image.'),
 });
 
 export default function InstitutionsPage() {
@@ -150,27 +150,41 @@ export default function InstitutionsPage() {
         toast({ variant: 'destructive', title: 'Invalid File', description: 'Some files were invalid (type or size) and were not added.' });
       }
 
-      setImageFiles(prev => [...prev, ...validFiles]);
+      const newFiles = [...imageFiles, ...validFiles];
+      setImageFiles(newFiles);
+      
       const newPreviews = validFiles.map(file => URL.createObjectURL(file));
-      setImagePreviews(prev => [...prev, ...newPreviews]);
+      const allPreviews = [...imagePreviews, ...newPreviews];
+      setImagePreviews(allPreviews);
+
+      // We need to update the form's imageUrls so validation can pass
+      // We will use the previews as temporary URLs for now
+      form.setValue('imageUrls', allPreviews, { shouldValidate: true });
+      if (form.getValues('mainImageUrl') === '' && allPreviews.length > 0) {
+        form.setValue('mainImageUrl', allPreviews[0], { shouldValidate: true });
+      }
     }
   };
 
-  const removeImage = (index: number) => {
-    const currentUrls = form.getValues('imageUrls');
-    const currentMainUrl = form.getValues('mainImageUrl');
-    const removedUrl = currentUrls[index];
+  const removeImage = (index: number, url: string) => {
+    const isLocalBlob = url.startsWith('blob:');
 
-    const newImageUrls = currentUrls.filter((_, i) => i !== index);
-    
-    form.setValue('imageUrls', newImageUrls, { shouldValidate: true });
-    setImagePreviews(newImageUrls); // Also update the visual preview
+    if (isLocalBlob) {
+        // It's a newly added file (not yet uploaded)
+        const fileIndex = imagePreviews.filter(p => p.startsWith('blob:')).indexOf(url);
+        if (fileIndex > -1) {
+            const newImageFiles = imageFiles.filter((_, i) => i !== fileIndex);
+            setImageFiles(newImageFiles);
+        }
+    }
 
-    // If the removed image was the main image, reset it
-    if (currentMainUrl === removedUrl) {
-      // Set the new main image to the first one in the list, or empty if none left
-      const newMainUrl = newImageUrls.length > 0 ? newImageUrls[0] : '';
-      form.setValue('mainImageUrl', newMainUrl, { shouldValidate: true });
+    const newImagePreviews = imagePreviews.filter((_, i) => i !== index);
+    setImagePreviews(newImagePreviews);
+    form.setValue('imageUrls', newImagePreviews, { shouldValidate: true });
+
+    if (form.getValues('mainImageUrl') === url) {
+        const newMainUrl = newImagePreviews.length > 0 ? newImagePreviews[0] : '';
+        form.setValue('mainImageUrl', newMainUrl, { shouldValidate: true });
     }
   };
 
@@ -181,36 +195,56 @@ export default function InstitutionsPage() {
   async function onSubmit(values: z.infer<typeof institutionFormSchema>) {
     if (!firestore) return;
     setIsSubmitting(true);
-    
+    setIsUploading(true);
+
     try {
-      let finalImageUrls = values.imageUrls || [];
-      if (imageFiles.length > 0) {
-        setIsUploading(true);
-        toast({ title: 'Uploading Images', description: `Uploading ${imageFiles.length} new image(s)...` });
-        const uploadedUrls = await Promise.all(
-          imageFiles.map(file => uploadImage(file).catch(e => {
-            console.error("Upload failed for a file", e);
-            toast({variant: 'destructive', title: 'Upload Failed', description: `Could not upload ${file.name}`});
-            return null;
-          }))
-        );
-        const successfulUrls = uploadedUrls.filter((url): url is string => url !== null);
-        finalImageUrls = [...finalImageUrls, ...successfulUrls];
+        let finalImageUrls = values.imageUrls.filter(url => !url.startsWith('blob:'));
+        
+        if (imageFiles.length > 0) {
+            toast({ title: 'Uploading Images', description: `Uploading ${imageFiles.length} new image(s)...` });
+            const uploadedUrls = await Promise.all(
+              imageFiles.map(file => uploadImage(file).catch(e => {
+                console.error("Upload failed for a file", e);
+                toast({variant: 'destructive', title: 'Upload Failed', description: `Could not upload ${file.name}`});
+                return null;
+              }))
+            );
+            const successfulUrls = uploadedUrls.filter((url): url is string => url !== null);
+            finalImageUrls = [...finalImageUrls, ...successfulUrls];
+        }
+        
         setIsUploading(false);
-      }
-      
-      if (finalImageUrls.length === 0) {
-          form.setError('imageUrls', { message: 'Please upload at least one image.'});
-          setIsSubmitting(false);
-          return;
-      }
-      
-      const mainImageUrl = finalImageUrls.includes(values.mainImageUrl) ? values.mainImageUrl : finalImageUrls[0];
+
+        if (finalImageUrls.length === 0) {
+            form.setError('imageUrls', { message: 'Please upload at least one image.'});
+            setIsSubmitting(false);
+            return;
+        }
+
+        // Map the blob URL of the main image to its final uploaded URL
+        let finalMainImageUrl = values.mainImageUrl;
+        if (values.mainImageUrl.startsWith('blob:')) {
+            const previewIndex = imagePreviews.indexOf(values.mainImageUrl);
+            const blobIndex = imagePreviews.filter(p => p.startsWith('blob:')).indexOf(values.mainImageUrl);
+            
+            // Find the corresponding final URL
+            const finalUrl = finalImageUrls.find(url => !values.imageUrls.includes(url));
+            // This is brittle. A better way: map blob urls to final urls.
+            const uploadedUrls = finalImageUrls.slice(values.imageUrls.filter(u => !u.startsWith('blob:')).length);
+            if (uploadedUrls[blobIndex]) {
+                finalMainImageUrl = uploadedUrls[blobIndex];
+            } else {
+                finalMainImageUrl = finalImageUrls[0]; // fallback
+            }
+        } else if (!finalImageUrls.includes(values.mainImageUrl)) {
+             finalMainImageUrl = finalImageUrls[0];
+        }
+
 
       const dataToSave = {
         ...values,
         imageUrls: finalImageUrls,
-        mainImageUrl,
+        mainImageUrl: finalMainImageUrl,
       };
 
       if (editingInstitution) {
@@ -259,7 +293,6 @@ export default function InstitutionsPage() {
     setEditingInstitution(null);
   }
   
-  const currentImageUrls = form.watch('imageUrls');
   const watchedMainImageUrl = form.watch('mainImageUrl');
 
   return (
@@ -297,10 +330,10 @@ export default function InstitutionsPage() {
                   <FormMessage>{form.formState.errors.imageUrls?.message}</FormMessage>
 
                   <div className="grid grid-cols-3 gap-2 mt-4">
-                    {imagePreviews?.map((url, index) => (
+                    {imagePreviews.map((url, index) => (
                       <div key={url} className="relative group aspect-square">
                         <Image src={url} alt={`Preview ${index}`} fill className="object-cover rounded-md" />
-                         {isUploading && !currentImageUrls.includes(url) ? (
+                         {isUploading && url.startsWith('blob:') ? (
                             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                                <Loader2 className="h-5 w-5 text-white animate-spin" />
                             </div>
@@ -309,7 +342,7 @@ export default function InstitutionsPage() {
                                 <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-white" onClick={() => setAsMainImage(url)}>
                                     <Star className={cn("h-4 w-4", watchedMainImageUrl === url && "fill-yellow-400 text-yellow-400")} />
                                 </Button>
-                                <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeImage(index)}>
+                                <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeImage(index, url)}>
                                     <X className="h-4 w-4" />
                                 </Button>
                             </div>
@@ -449,6 +482,3 @@ export default function InstitutionsPage() {
     </div>
   );
 }
-
-    
-    
