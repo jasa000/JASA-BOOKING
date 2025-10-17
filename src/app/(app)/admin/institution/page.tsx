@@ -64,7 +64,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useCollection } from '@/firebase';
-import { Pencil, Trash2, X, Star, UploadCloud, School, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, X, Star, UploadCloud, Loader2, School } from 'lucide-react';
 import type { Institution } from '@/lib/types';
 import { uploadImage } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
@@ -155,35 +155,6 @@ export default function InstitutionsPage() {
       setImagePreviews(prev => [...prev, ...newPreviews]);
     }
   };
-  
-  const handleUploadImages = async () => {
-    if (imageFiles.length === 0) {
-      // If no new files, just return the existing URLs
-      return form.getValues('imageUrls') || [];
-    }
-    setIsUploading(true);
-    toast({ title: 'Uploading Images', description: `Uploading ${imageFiles.length} new image(s)...` });
-    
-    const uploadedUrls = await Promise.all(
-      imageFiles.map(file => uploadImage(file).catch(e => {
-        console.error("Upload failed for a file", e);
-        toast({variant: 'destructive', title: 'Upload Failed', description: `Could not upload ${file.name}`});
-        return null;
-      }))
-    );
-    setIsUploading(false);
-    
-    const successfulUrls = uploadedUrls.filter((url): url is string => url !== null);
-    const existingUrls = form.getValues('imageUrls');
-    const allUrls = [...existingUrls, ...successfulUrls];
-    
-    form.setValue('imageUrls', allUrls, { shouldValidate: true });
-    
-    // Clear staged files after upload
-    setImageFiles([]);
-
-    return allUrls;
-  };
 
   const removeImage = (index: number) => {
     const currentUrls = form.getValues('imageUrls');
@@ -212,7 +183,21 @@ export default function InstitutionsPage() {
     setIsSubmitting(true);
     
     try {
-      const finalImageUrls = await handleUploadImages();
+      let finalImageUrls = values.imageUrls || [];
+      if (imageFiles.length > 0) {
+        setIsUploading(true);
+        toast({ title: 'Uploading Images', description: `Uploading ${imageFiles.length} new image(s)...` });
+        const uploadedUrls = await Promise.all(
+          imageFiles.map(file => uploadImage(file).catch(e => {
+            console.error("Upload failed for a file", e);
+            toast({variant: 'destructive', title: 'Upload Failed', description: `Could not upload ${file.name}`});
+            return null;
+          }))
+        );
+        const successfulUrls = uploadedUrls.filter((url): url is string => url !== null);
+        finalImageUrls = [...finalImageUrls, ...successfulUrls];
+        setIsUploading(false);
+      }
       
       if (finalImageUrls.length === 0) {
           form.setError('imageUrls', { message: 'Please upload at least one image.'});
@@ -246,6 +231,8 @@ export default function InstitutionsPage() {
       });
     } finally {
       setIsSubmitting(false);
+      setIsUploading(false);
+      setImageFiles([]);
     }
   }
 
@@ -302,7 +289,7 @@ export default function InstitutionsPage() {
                         accept={ACCEPTED_IMAGE_TYPES.join(',')}
                         multiple
                         onChange={handleFileChange}
-                        disabled={isUploading}
+                        disabled={isUploading || isSubmitting}
                         ref={fileInputRef}
                       />
                     </div>
@@ -310,25 +297,23 @@ export default function InstitutionsPage() {
                   <FormMessage>{form.formState.errors.imageUrls?.message}</FormMessage>
 
                   <div className="grid grid-cols-3 gap-2 mt-4">
-                    {currentImageUrls?.map((url, index) => (
+                    {imagePreviews?.map((url, index) => (
                       <div key={url} className="relative group aspect-square">
                         <Image src={url} alt={`Preview ${index}`} fill className="object-cover rounded-md" />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 rounded-md">
-                          <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-white" onClick={() => setAsMainImage(url)}>
-                              <Star className={cn("h-4 w-4", watchedMainImageUrl === url && "fill-yellow-400 text-yellow-400")} />
-                          </Button>
-                          <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeImage(index)}>
-                              <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                     {imagePreviews.filter(p => !currentImageUrls.includes(p)).map((previewUrl, index) => (
-                      <div key={previewUrl} className="relative group aspect-square opacity-50">
-                        <Image src={previewUrl} alt={`Uploading Preview ${index}`} fill className="object-cover rounded-md" />
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                           <Loader2 className="h-5 w-5 text-white animate-spin" />
-                        </div>
+                         {isUploading && !currentImageUrls.includes(url) ? (
+                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                               <Loader2 className="h-5 w-5 text-white animate-spin" />
+                            </div>
+                         ) : (
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 rounded-md">
+                                <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-white" onClick={() => setAsMainImage(url)}>
+                                    <Star className={cn("h-4 w-4", watchedMainImageUrl === url && "fill-yellow-400 text-yellow-400")} />
+                                </Button>
+                                <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeImage(index)}>
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                         )}
                       </div>
                     ))}
                   </div>
@@ -465,4 +450,5 @@ export default function InstitutionsPage() {
   );
 }
 
+    
     
