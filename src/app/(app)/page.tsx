@@ -56,14 +56,16 @@ export default function EventsPage() {
     <div className="container mx-auto px-4 py-8">
       <WelcomeBanner />
       
-      <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm -mx-4 border-b">
-         <div className='container'>
+       <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm -mx-4 border-b">
+         <div className='container py-4'>
             <CategoryFilter selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
          </div>
-         <InstitutionFilter />
       </div>
       
+      <InstitutionFilter />
+      
       <div className="mt-8">
+         <h2 className="text-3xl font-bold font-headline mb-6">Upcoming Events</h2>
         {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {[...Array(8)].map((_, i) => (

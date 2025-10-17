@@ -38,4 +38,9 @@ export type Category = {
 export type Institution = {
   id: string;
   name: string;
+  state: string;
+  district: string;
+  address: string;
+  imageUrls: string[];
+  mainImageUrl: string;
 };

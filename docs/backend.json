@@ -96,9 +96,31 @@
         "name": {
           "type": "string",
           "description": "The name of the institution."
+        },
+        "state": {
+          "type": "string",
+          "description": "The state where the institution is located."
+        },
+        "district": {
+          "type": "string",
+          "description": "The district where the institution is located."
+        },
+        "address": {
+          "type": "string",
+          "description": "The detailed address of the institution."
+        },
+        "imageUrls": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" },
+          "description": "A list of URLs for images of the institution."
+        },
+        "mainImageUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "The URL of the primary image to be displayed prominently."
         }
       },
-      "required": ["name"]
+      "required": ["name", "state", "district", "address", "imageUrls", "mainImageUrl"]
     }
   },
   "auth": {

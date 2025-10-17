@@ -5,10 +5,12 @@ import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import type { Institution } from '@/lib/types';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import Link from 'next/link';
+import Image from 'next/image';
+import { Card, CardContent } from './ui/card';
+import { MapPin } from 'lucide-react';
 
 export function InstitutionFilter() {
   const firestore = useFirestore();
@@ -31,39 +33,56 @@ export function InstitutionFilter() {
 
   if (error) {
     return (
-      <div className="container h-14 flex items-center justify-center">
-          <p className="text-sm text-destructive">Error loading institutions.</p>
+      <div className="container py-8">
+        <p className="text-sm text-destructive">Error loading institutions.</p>
       </div>
     );
   }
 
   return (
-    <div className="border-t">
-        <div className="container py-4">
-            <h3 className="text-lg font-semibold mb-2 font-headline">Browse by Institution</h3>
-            <ScrollArea className="w-full whitespace-nowrap">
-            <div className="flex items-center gap-2">
-                {loading ? (
-                    [...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-9 w-28 rounded-md" />
-                ))
-                ) : (
-                institutions?.map((institution) => (
-                    <Link key={institution.id} href={`/institution/${encodeURIComponent(institution.name)}`} passHref>
-                        <Button
-                            variant='outline'
-                            size="sm"
-                            className="shrink-0"
-                            >
-                            {institution.name}
-                        </Button>
-                    </Link>
-                ))
-                )}
-            </div>
-            <ScrollBar orientation="horizontal" className="invisible" />
-            </ScrollArea>
+    <div className="container py-8">
+      <h2 className="text-3xl font-bold font-headline mb-6">Browse by Institution</h2>
+      <ScrollArea className="w-full">
+        <div className="flex gap-6 pb-4">
+          {loading
+            ? [...Array(4)].map((_, i) => (
+                <div key={i} className="flex flex-col space-y-3 w-72">
+                  <Skeleton className="h-40 w-full rounded-lg" />
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              ))
+            : institutions?.map((institution) => (
+                <Link
+                  key={institution.id}
+                  href={`/institution/${encodeURIComponent(institution.name)}`}
+                  passHref
+                  className="w-72 shrink-0"
+                >
+                  <Card className="overflow-hidden transition-transform duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col">
+                    <div className="relative h-40 w-full">
+                      <Image
+                        src={institution.mainImageUrl}
+                        alt={institution.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <CardContent className="p-4 flex-grow">
+                      <h3 className="font-semibold font-headline text-lg truncate hover:text-primary transition-colors">
+                        {institution.name}
+                      </h3>
+                      <div className="text-sm text-muted-foreground flex items-center mt-2">
+                        <MapPin className="mr-1.5 h-4 w-4 shrink-0" />
+                        <span>{`${institution.district}, ${institution.state}`}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
         </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </div>
   );
 }
