@@ -54,7 +54,7 @@ export function AdminMenu() {
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
-                <Link href="/admin">
+                <Link href="/admin/pending-events">
                     <MenubarTrigger className="cursor-pointer">
                         Pending Events
                     </MenubarTrigger>

@@ -2,205 +2,83 @@
 'use client';
 
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
   Card,
-  CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
+  CardContent
 } from '@/components/ui/card';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { CheckCircle, XCircle } from 'lucide-react';
-import { useCollection, useFirestore } from '@/firebase';
-import {
-  collection,
-  query,
-  where,
-  doc,
-  updateDoc,
-} from 'firebase/firestore';
-import type { Event } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
+import { useCollection, useFirestore, useUser } from '@/firebase';
+import type { Event, Institution, UserProfile } from '@/lib/types';
+import { collection, query, where } from 'firebase/firestore';
+import { Users, Calendar, Building, Hourglass } from 'lucide-react';
 import React from 'react';
 
-export default function AdminPage() {
+function StatCard({ title, value, icon: Icon, loading }: { title: string, value: number, icon: React.ElementType, loading: boolean }) {
+    return (
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                <Icon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">
+                    {loading ? '...' : value}
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
+
+export default function AdminDashboardPage() {
   const firestore = useFirestore();
-  const { toast } = useToast();
 
-  const eventsCollectionRef = React.useMemo(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'events');
-  }, [firestore]);
+  // Fetch total users
+  const usersQuery = React.useMemo(() => 
+    firestore ? query(collection(firestore, 'users')) : null, [firestore]);
+  const { data: users, loading: usersLoading } = useCollection<UserProfile>(usersQuery);
 
-  const pendingEventsQuery = React.useMemo(() => {
-    if (!eventsCollectionRef) return null;
-    return query(eventsCollectionRef, where('status', '==', 'pending'));
-  }, [eventsCollectionRef]);
+  // Fetch total events (approved)
+  const eventsQuery = React.useMemo(() =>
+    firestore ? query(collection(firestore, 'events'), where('status', '==', 'approved')) : null, [firestore]);
+  const { data: events, loading: eventsLoading } = useCollection<Event>(eventsQuery);
+  
+  // Fetch pending events
+  const pendingEventsQuery = React.useMemo(() =>
+    firestore ? query(collection(firestore, 'events'), where('status', '==', 'pending')) : null, [firestore]);
+  const { data: pendingEvents, loading: pendingEventsLoading } = useCollection<Event>(pendingEventsQuery);
 
-  const {
-    data: pendingEvents,
-    loading,
-    error,
-  } = useCollection<Event>(pendingEventsQuery);
+  // Fetch total institutions
+  const institutionsQuery = React.useMemo(() =>
+    firestore ? query(collection(firestore, 'institutions')) : null, [firestore]);
+  const { data: institutions, loading: institutionsLoading } = useCollection<Institution>(institutionsQuery);
 
-  const handleEventStatusChange = async (eventId: string, newStatus: 'approved' | 'rejected') => {
-    if (!firestore) return;
-    const eventDocRef = doc(firestore, 'events', eventId);
-    try {
-      await updateDoc(eventDocRef, { status: newStatus });
-      toast({
-        title: `Event ${newStatus}`,
-        description: `The event has been successfully ${newStatus}.`,
-      });
-    } catch (e: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: e.message || 'Could not update event status.',
-      });
-    }
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Pending Events</CardTitle>
-          <CardDescription>
-            {loading
-              ? 'Loading events...'
-              : `There are ${
-                  pendingEvents?.length || 0
-                } events awaiting your approval.`}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="border rounded-md">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Event Title</TableHead>
-                  <TableHead>Organizer</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
-                      Loading pending events...
-                    </TableCell>
-                  </TableRow>
-                ) : error ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      className="h-24 text-center text-destructive"
-                    >
-                      Error loading events: {error.message}
-                    </TableCell>
-                  </TableRow>
-                ) : pendingEvents && pendingEvents.length > 0 ? (
-                  pendingEvents.map((event) => (
-                    <TableRow key={event.id}>
-                      <TableCell className="font-medium">
-                        {event.title}
-                      </TableCell>
-                      <TableCell>{event.organizer}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{event.category}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-green-500 hover:text-green-600"
-                            >
-                              <CheckCircle className="h-5 w-5" />
-                              <span className="sr-only">Approve</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Approve Event?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to approve the event "{event.title}"?
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleEventStatusChange(event.id, 'approved')}>
-                                Approve
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-red-500 hover:text-red-600"
-                            >
-                              <XCircle className="h-5 w-5" />
-                              <span className="sr-only">Reject</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                           <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Reject Event?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to reject the event "{event.title}"? This cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                className="bg-destructive hover:bg-destructive/90"
-                                onClick={() => handleEventStatusChange(event.id, 'rejected')}
-                              >
-                                Reject
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
-                      No pending events.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+        <div className="space-y-2 mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+            <p className="text-muted-foreground">An overview of your application's data.</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <StatCard title="Total Users" value={users?.length || 0} icon={Users} loading={usersLoading} />
+            <StatCard title="Approved Events" value={events?.length || 0} icon={Calendar} loading={eventsLoading} />
+            <StatCard title="Pending Events" value={pendingEvents?.length || 0} icon={Hourglass} loading={pendingEventsLoading} />
+            <StatCard title="Total Institutions" value={institutions?.length || 0} icon={Building} loading={institutionsLoading} />
+        </div>
+
+        <div className="mt-8">
+          <Card>
+            <CardHeader>
+                <CardTitle>Welcome, Admin!</CardTitle>
+                <CardDescription>Use the menu above to manage your application.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <p>From here you can approve new events, manage users, and organize event categories and institutions.</p>
+            </CardContent>
+          </Card>
+        </div>
     </div>
   );
 }
