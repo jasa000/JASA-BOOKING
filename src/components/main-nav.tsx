@@ -17,10 +17,8 @@ export function MainNav({
       {...props}
     >
       <Link href="/" className="flex items-center space-x-2">
-        <span className="font-bold font-headline text-lg relative inline-block overflow-hidden whitespace-nowrap">
-          <span className="relative bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            JASA BOOKING
-          </span>
+        <span className="font-bold font-headline text-lg">
+          JASA BOOKING
         </span>
       </Link>
     </nav>
