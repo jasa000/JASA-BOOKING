@@ -43,7 +43,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { UserShield } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import type { UserProfile } from '@/lib/types';
 import { Label } from '@/components/ui/label';
 
@@ -184,7 +184,7 @@ export default function ManageUsersPage() {
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-3">
                           <Avatar>
-                            <AvatarImage src={user.photoURL} alt={user.displayName} />
+                            <AvatarImage src={user.photoURL ?? undefined} alt={user.displayName ?? ''} />
                             <AvatarFallback>
                               {user.displayName?.charAt(0) || user.email?.charAt(0)}
                             </AvatarFallback>
@@ -205,7 +205,7 @@ export default function ManageUsersPage() {
                            <AlertDialog onOpenChange={(open) => !open && setSelectedUser(null)}>
                             <AlertDialogTrigger asChild>
                                <Button variant="outline" size="sm" onClick={() => setSelectedUser(user)}>
-                                 <UserShield className="mr-2 h-4 w-4" />
+                                 <ShieldCheck className="mr-2 h-4 w-4" />
                                  Make Admin
                                </Button>
                             </AlertDialogTrigger>
