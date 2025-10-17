@@ -141,10 +141,10 @@ export default function InstitutionsPage() {
         state: editingInstitution.state,
         district: editingInstitution.district,
         address: editingInstitution.address,
-        imageUrls: editingInstitution.imageUrls,
+        imageUrls: editingInstitution.imageUrls || [],
         mainImageUrl: editingInstitution.mainImageUrl,
       });
-      setImagePreviews(editingInstitution.imageUrls);
+      setImagePreviews(editingInstitution.imageUrls || []);
       setImageFiles([]);
     } else {
       form.reset({ name: '', state: '', district: '', address: '', imageUrls: [], mainImageUrl: '' });
@@ -465,3 +465,5 @@ export default function InstitutionsPage() {
   );
 }
 
+
+    
