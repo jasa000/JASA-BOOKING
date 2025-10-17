@@ -2,6 +2,17 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  devIndicators: {
+    allowedDevOrigins: [
+      // Allow any Vercel preview deployment
+      '**vercel.app',
+      // Allow any Firebase project
+      '**web.app',
+      '**firebaseapp.com',
+      // Allow any Cloud Workstation
+      '**cloudworkstations.dev',
+    ],
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
