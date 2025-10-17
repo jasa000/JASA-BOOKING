@@ -49,7 +49,14 @@ export function AdminMenu() {
               <MenubarMenu>
                 <Link href="/admin">
                   <MenubarTrigger className="cursor-pointer">
-                    Dashboard
+                    Admin Dashboard
+                  </MenubarTrigger>
+                </Link>
+              </MenubarMenu>
+              <MenubarMenu>
+                <Link href="/">
+                  <MenubarTrigger className="cursor-pointer">
+                    User Dashboard
                   </MenubarTrigger>
                 </Link>
               </MenubarMenu>
