@@ -86,23 +86,33 @@ export async function GET() {
 
 export async function DELETE(request: Request) {
     try {
-        const { public_id } = await request.json();
+        const { public_ids } = await request.json();
 
-        if (!public_id) {
-            return NextResponse.json({ message: 'Public ID is required' }, { status: 400 });
+        if (!public_ids || !Array.isArray(public_ids) || public_ids.length === 0) {
+            return NextResponse.json({ message: 'An array of public_ids is required' }, { status: 400 });
         }
         
-        const result = await cloudinary.uploader.destroy(public_id);
+        // Use `delete_resources` for bulk deletion
+        const result = await cloudinary.api.delete_resources(public_ids);
 
-        if (result.result !== 'ok') {
-            throw new Error('Failed to delete image from Cloudinary.');
+        const deleted = Object.keys(result.deleted);
+        const errors = Object.keys(result.deleted_counts).filter(id => result.deleted_counts[id].state === 'not_found' || result.deleted_counts[id].state === 'error');
+        
+        if (errors.length > 0) {
+           console.error("Errors deleting some resources:", result);
         }
 
-        return NextResponse.json({ message: 'Image deleted successfully', public_id });
+        if (deleted.length === 0 && errors.length > 0) {
+            throw new Error('Failed to delete any of the specified images from Cloudinary.');
+        }
+
+        return NextResponse.json({ message: 'Images processed successfully', deleted, errors });
 
     } catch (error) {
         console.error("Error deleting from Cloudinary:", error);
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-        return NextResponse.json({ message: 'Failed to delete image', error: errorMessage }, { status: 500 });
+        return NextResponse.json({ message: 'Failed to delete images', error: errorMessage }, { status: 500 });
     }
 }
+
+    

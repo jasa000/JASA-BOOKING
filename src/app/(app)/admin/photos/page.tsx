@@ -36,6 +36,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 
 
 interface CloudinaryImage {
@@ -92,11 +93,23 @@ export default function PhotoManagementPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const { toast } = useToast();
+
+  const { usedImages, unusedImages } = useMemo(() => {
+    const used = images.filter(img => img.isUsed);
+    const unused = images.filter(img => !img.isUsed);
+    return { usedImages: used, unusedImages: unused };
+  }, [images]);
+
+  useEffect(() => {
+    setSelectedImages([]);
+  }, [unusedImages]);
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
+    setSelectedImages([]);
     try {
       const res = await fetch('/api/cloudinary');
       if (!res.ok) {
@@ -117,22 +130,24 @@ export default function PhotoManagementPage() {
     fetchData();
   }, []);
 
-  const handleDelete = async (public_id: string) => {
-    setDeletingId(public_id);
+  const handleDelete = async (public_ids: string[]) => {
+    if (public_ids.length === 0) return;
+    setDeletingId(public_ids[0]); // to show loading state
     try {
       const res = await fetch('/api/cloudinary', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ public_id }),
+        body: JSON.stringify({ public_ids }),
       });
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to delete image');
+        throw new Error(errorData.message || 'Failed to delete image(s)');
       }
-      setImages(images.filter((img) => img.public_id !== public_id));
+      setImages(images.filter((img) => !public_ids.includes(img.public_id)));
+      setSelectedImages([]);
       toast({
-        title: 'Image Deleted',
-        description: 'The unused image has been removed from Cloudinary.',
+        title: `Image${public_ids.length > 1 ? 's' : ''} Deleted`,
+        description: `${public_ids.length} unused image${public_ids.length > 1 ? 's have' : ' has'} been removed.`,
       });
     } catch (e: any) {
       toast({
@@ -145,12 +160,6 @@ export default function PhotoManagementPage() {
     }
   };
 
-  const { usedImages, unusedImages } = useMemo(() => {
-    const used = images.filter(img => img.isUsed);
-    const unused = images.filter(img => !img.isUsed);
-    return { usedImages: used, unusedImages: unused };
-  }, [images]);
-
   const stats = useMemo(() => ({
     total: images.length,
     used: usedImages.length,
@@ -159,11 +168,35 @@ export default function PhotoManagementPage() {
     unusedSize: unusedImages.reduce((acc, img) => acc + img.bytes, 0),
   }), [images, usedImages, unusedImages]);
 
-  const renderTable = (data: CloudinaryImage[]) => (
+  const handleSelect = (public_id: string) => {
+    setSelectedImages(prev => 
+      prev.includes(public_id) 
+        ? prev.filter(id => id !== public_id)
+        : [...prev, public_id]
+    );
+  };
+
+  const handleSelectAll = (checked: boolean | 'indeterminate') => {
+    if (checked === true) {
+      setSelectedImages(unusedImages.map(img => img.public_id));
+    } else {
+      setSelectedImages([]);
+    }
+  };
+  
+  const renderTable = (data: CloudinaryImage[], isUnusedTable = false) => (
      <div className="border rounded-md">
         <Table>
             <TableHeader>
                 <TableRow>
+                    {isUnusedTable && (
+                      <TableHead className="w-[50px]">
+                        <Checkbox
+                          checked={selectedImages.length > 0 && selectedImages.length === unusedImages.length ? true : (selectedImages.length > 0 ? 'indeterminate' : false)}
+                          onCheckedChange={handleSelectAll}
+                        />
+                      </TableHead>
+                    )}
                     <TableHead>Preview</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Size</TableHead>
@@ -173,7 +206,15 @@ export default function PhotoManagementPage() {
             </TableHeader>
             <TableBody>
                 {data.map((image) => (
-                <TableRow key={image.public_id}>
+                <TableRow key={image.public_id} data-state={selectedImages.includes(image.public_id) && 'selected'}>
+                    {isUnusedTable && (
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedImages.includes(image.public_id)}
+                          onCheckedChange={() => handleSelect(image.public_id)}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell>
                         <a href={image.url} target="_blank" rel="noopener noreferrer">
                             <Image
@@ -195,7 +236,7 @@ export default function PhotoManagementPage() {
                     {format(new Date(image.created_at), 'dd MMM yyyy')}
                     </TableCell>
                     <TableCell className="text-right">
-                    {!image.isUsed && (
+                    {!image.isUsed && !isUnusedTable && (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button
@@ -221,7 +262,7 @@ export default function PhotoManagementPage() {
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     <AlertDialogAction
-                                        onClick={() => handleDelete(image.public_id)}
+                                        onClick={() => handleDelete([image.public_id])}
                                         className="bg-destructive hover:bg-destructive/90"
                                     >
                                         Yes, Delete
@@ -326,7 +367,36 @@ export default function PhotoManagementPage() {
                             {renderTable(usedImages)}
                         </TabsContent>
                         <TabsContent value="unused" className="p-4 pt-0">
-                            {renderTable(unusedImages)}
+                             <div className="flex items-center justify-end p-2">
+                                {selectedImages.length > 0 && (
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                        <Button variant="destructive" disabled={deletingId !== null}>
+                                            {deletingId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                                            Delete Selected ({selectedImages.length})
+                                        </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This will permanently delete {selectedImages.length} image(s) from Cloudinary. This action cannot be undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={() => handleDelete(selectedImages)}
+                                                    className="bg-destructive hover:bg-destructive/90"
+                                                >
+                                                    Yes, Delete
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                )}
+                            </div>
+                            {renderTable(unusedImages, true)}
                         </TabsContent>
                     </Tabs>
                 </CardContent>
@@ -336,3 +406,5 @@ export default function PhotoManagementPage() {
     </div>
   );
 }
+
+    
