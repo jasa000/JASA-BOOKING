@@ -11,6 +11,7 @@ import {
   MenubarTrigger,
 } from '@/components/ui/menubar';
 import Link from 'next/link';
+import { ScrollArea } from './ui/scroll-area';
 
 export function AdminMenu() {
   const { user, loading } = useUser();
@@ -42,45 +43,47 @@ export function AdminMenu() {
 
   return (
     <div className="border-b bg-background">
-      <div className="container px-4 md:px-6">
-        <Menubar className="border-none rounded-none h-12 justify-start">
-          <MenubarMenu>
-            <Link href="/" legacyBehavior={false}>
-              <MenubarTrigger className="cursor-pointer">
-                Dashboard
-              </MenubarTrigger>
-            </Link>
-          </MenubarMenu>
-          <MenubarMenu>
-             <Link href="/admin" legacyBehavior={false}>
-                <MenubarTrigger className="cursor-pointer">
-                    Pending Events
-                </MenubarTrigger>
-             </Link>
-          </MenubarMenu>
-          <MenubarMenu>
-             <Link href="/admin/users" legacyBehavior={false}>
-                <MenubarTrigger className="cursor-pointer">
-                    Manage Users
-                </MenubarTrigger>
-             </Link>
-          </MenubarMenu>
-          <MenubarMenu>
-             <Link href="/admin/categories" legacyBehavior={false}>
-                <MenubarTrigger className="cursor-pointer">
-                    Categories
-                </MenubarTrigger>
-             </Link>
-          </MenubarMenu>
-          <MenubarMenu>
-             <Link href="/admin/institution" legacyBehavior={false}>
-                <MenubarTrigger className="cursor-pointer">
-                    INSTITUTION
-                </MenubarTrigger>
-             </Link>
-          </MenubarMenu>
-        </Menubar>
-      </div>
+      <ScrollArea className="w-full whitespace-nowrap">
+        <div className="container flex h-12 min-w-[370px] items-center px-4 md:px-6">
+            <Menubar className="border-none rounded-none p-0 h-auto">
+              <MenubarMenu>
+                <Link href="/" legacyBehavior passHref>
+                  <MenubarTrigger className="cursor-pointer">
+                    Dashboard
+                  </MenubarTrigger>
+                </Link>
+              </MenubarMenu>
+              <MenubarMenu>
+                <Link href="/admin" legacyBehavior passHref>
+                    <MenubarTrigger className="cursor-pointer">
+                        Pending Events
+                    </MenubarTrigger>
+                </Link>
+              </MenubarMenu>
+              <MenubarMenu>
+                <Link href="/admin/users" legacyBehavior passHref>
+                    <MenubarTrigger className="cursor-pointer">
+                        Manage Users
+                    </MenubarTrigger>
+                </Link>
+              </MenubarMenu>
+              <MenubarMenu>
+                <Link href="/admin/categories" legacyBehavior passHref>
+                    <MenubarTrigger className="cursor-pointer">
+                        Categories
+                    </MenubarTrigger>
+                </Link>
+              </MenubarMenu>
+              <MenubarMenu>
+                <Link href="/admin/institution" legacyBehavior passHref>
+                    <MenubarTrigger className="cursor-pointer">
+                        INSTITUTION
+                    </MenubarTrigger>
+                </Link>
+              </MenubarMenu>
+            </Menubar>
+        </div>
+      </ScrollArea>
     </div>
   );
 }
