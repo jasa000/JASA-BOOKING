@@ -64,7 +64,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useCollection } from '@/firebase';
-import { Pencil, Trash2, X, Star, UploadCloud, School } from 'lucide-react';
+import { Pencil, Trash2, X, Star, UploadCloud, School, Loader2 } from 'lucide-react';
 import type { Institution } from '@/lib/types';
 import { uploadImage } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
@@ -464,3 +464,5 @@ export default function InstitutionsPage() {
     </div>
   );
 }
+
+    
