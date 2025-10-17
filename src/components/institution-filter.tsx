@@ -52,7 +52,7 @@ export function InstitutionFilter() {
                   <Skeleton className="h-4 w-1/2" />
                 </div>
               ))
-            : institutions?.map((institution) => (
+            : institutions?.filter(inst => inst.mainImageUrl).map((institution) => (
                 <Link
                   key={institution.id}
                   href={`/institution/${encodeURIComponent(institution.name)}`}
@@ -60,13 +60,15 @@ export function InstitutionFilter() {
                   className="w-72 shrink-0"
                 >
                   <Card className="overflow-hidden transition-transform duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col">
-                    <div className="relative h-40 w-full">
-                      <Image
-                        src={institution.mainImageUrl}
-                        alt={institution.name}
-                        fill
-                        className="object-cover"
-                      />
+                    <div className="relative h-40 w-full bg-muted">
+                      {institution.mainImageUrl && (
+                        <Image
+                          src={institution.mainImageUrl}
+                          alt={institution.name}
+                          fill
+                          className="object-cover"
+                        />
+                      )}
                     </div>
                     <CardContent className="p-4 flex-grow">
                       <h3 className="font-semibold font-headline text-lg truncate hover:text-primary transition-colors">
