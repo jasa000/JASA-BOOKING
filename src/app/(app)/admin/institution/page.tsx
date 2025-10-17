@@ -44,7 +44,7 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useCollection } from '@/firebase';
-import { Pencil, Trash2, X, Star, UploadCloud } from 'lucide-react';
+import { Pencil, Trash2, X, Star, UploadCloud, School } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -68,6 +68,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { uploadImage } from '@/lib/cloudinary';
+import { cn } from '@/lib/utils';
 
 // Sample data for states and districts
 const locationData: { [key: string]: string[] } = {
@@ -423,7 +424,13 @@ export default function InstitutionsPage() {
                     institutions.map((institution) => (
                       <TableRow key={institution.id}>
                         <TableCell className="font-medium flex items-center gap-3">
-                          <Image src={institution.mainImageUrl} alt={institution.name} width={40} height={40} className="rounded-md object-cover" />
+                          {institution.mainImageUrl ? (
+                            <Image src={institution.mainImageUrl} alt={institution.name} width={40} height={40} className="rounded-md object-cover" />
+                          ) : (
+                             <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
+                                <School className="h-5 w-5 text-muted-foreground" />
+                             </div>
+                          )}
                           {institution.name}
                         </TableCell>
                         <TableCell>{institution.district}, {institution.state}</TableCell>
@@ -457,3 +464,4 @@ export default function InstitutionsPage() {
     </div>
   );
 }
+
