@@ -63,11 +63,9 @@ export default function EventsPage() {
     }
 
     for (const event of approvedEvents) {
-      if (!grouped[event.category]) {
-        // This handles events with categories that might have been deleted
-        grouped[event.category] = [];
+      if (grouped[event.category]) {
+        grouped[event.category].push(event);
       }
-      grouped[event.category].push(event);
     }
 
     return grouped;
@@ -118,40 +116,43 @@ export default function EventsPage() {
          <div className="space-y-12">
             {categories && categories.map(category => {
                 const categoryEvents = eventsByCategory[category.name];
-                if (!categoryEvents || categoryEvents.length === 0) {
-                    return null;
-                }
                 return (
                     <Card key={category.id} className="overflow-hidden">
                         <CardHeader>
                             <CardTitle className="font-headline text-2xl">{category.name}</CardTitle>
                         </CardHeader>
                         <CardContent>
-                             <Carousel 
-                                opts={{
-                                    align: "start",
-                                    loop: false,
-                                }}
-                                className="w-full"
-                             >
-                                <CarouselContent className="-ml-4">
-                                    {categoryEvents.map((event) => (
-                                    <CarouselItem key={event.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                                        <EventCard event={event} />
-                                    </CarouselItem>
-                                    ))}
-                                </CarouselContent>
-                                <CarouselPrevious className="hidden sm:flex" />
-                                <CarouselNext className="hidden sm:flex" />
-                            </Carousel>
+                            {categoryEvents && categoryEvents.length > 0 ? (
+                                <Carousel 
+                                    opts={{
+                                        align: "start",
+                                        loop: false,
+                                    }}
+                                    className="w-full"
+                                >
+                                    <CarouselContent className="-ml-4">
+                                        {categoryEvents.map((event) => (
+                                        <CarouselItem key={event.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                                            <EventCard event={event} />
+                                        </CarouselItem>
+                                        ))}
+                                    </CarouselContent>
+                                    <CarouselPrevious className="hidden sm:flex" />
+                                    <CarouselNext className="hidden sm:flex" />
+                                </Carousel>
+                            ) : (
+                                <div className="text-center py-10 text-muted-foreground">
+                                    <p>NO EVENTS. STAY TUNED FOR UPCOMING.....</p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 )
             })}
-             {Object.keys(eventsByCategory).length === 0 && (
+             {!categories || Object.keys(eventsByCategory).length === 0 && (
                  <div className="col-span-full text-center py-12 text-muted-foreground">
-                    <h2 className="text-2xl font-semibold">No Events Found</h2>
-                    <p>Check back later for new and exciting events.</p>
+                    <h2 className="text-2xl font-semibold">No Categories Found</h2>
+                    <p>The administrator has not configured any event categories yet.</p>
                 </div>
              )}
          </div>
