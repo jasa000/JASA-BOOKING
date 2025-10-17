@@ -3,16 +3,20 @@
 
 import type { Event } from '@/lib/types';
 import { EventCard } from '@/components/event-card';
-import { useCollection, useFirestore } from '@/firebase';
+import { useCollection, useFirestore, useUser } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import React, { useMemo, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WelcomeBanner } from '@/components/welcome-banner';
 import { CategoryFilter } from '@/components/category-filter';
 import { InstitutionFilter } from '@/components/institution-filter';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function EventsPage() {
   const firestore = useFirestore();
+  const { user, loading: userLoading } = useUser();
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   // 1. Fetch all approved events
@@ -32,7 +36,7 @@ export default function EventsPage() {
 
   const {
     data: allEvents,
-    loading,
+    loading: eventsLoading,
     error,
   } = useCollection<Event>(approvedEventsQuery);
 
@@ -52,6 +56,8 @@ export default function EventsPage() {
     )
   }
 
+  const loading = eventsLoading || userLoading;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <WelcomeBanner />
@@ -62,7 +68,41 @@ export default function EventsPage() {
          </div>
       </div>
       
-      <InstitutionFilter />
+      {userLoading ? (
+        <div className="container py-8">
+          <Skeleton className="h-8 w-1/2 mb-6" />
+          <div className="flex gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex flex-col space-y-3 w-72">
+                <Skeleton className="h-40 w-full rounded-lg" />
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : user ? (
+        <InstitutionFilter />
+      ) : (
+        <div className="container py-8 text-center">
+            <Card className="max-w-2xl mx-auto">
+                <CardContent className="p-8">
+                    <h2 className="text-2xl font-bold font-headline mb-4">View Events by Institution</h2>
+                    <p className="text-muted-foreground mb-6">
+                        Log in or create an account to browse events hosted by specific colleges and institutions.
+                    </p>
+                    <div className="flex justify-center gap-4">
+                        <Button asChild>
+                            <Link href="/login">Log In</Link>
+                        </Button>
+                        <Button variant="secondary" asChild>
+                            <Link href="/register">Sign Up</Link>
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+      )}
       
       <div className="mt-8">
          <h2 className="text-3xl font-bold font-headline mb-6">Upcoming Events</h2>
