@@ -1,17 +1,17 @@
 
 'use client';
 
-import type { Event, Category } from '@/lib/types';
+import type { Event } from '@/lib/types';
 import { EventCard } from '@/components/event-card';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { CategoryFilter } from '@/components/category-filter';
 
 export default function EventsPage() {
   const firestore = useFirestore();
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   // Fetch approved events
   const eventsCollectionRef = useMemo(() => {
@@ -22,141 +22,72 @@ export default function EventsPage() {
   const approvedEventsQuery = useMemo(() => {
     if (!eventsCollectionRef) return null;
     return query(
-        eventsCollectionRef, 
-        where('status', '==', 'approved'),
-        orderBy('date', 'asc')
+      eventsCollectionRef,
+      where('status', '==', 'approved'),
+      orderBy('date', 'asc')
     );
   }, [eventsCollectionRef]);
 
   const {
-    data: approvedEvents,
-    loading: eventsLoading,
-    error: eventsError,
+    data: allEvents,
+    loading,
+    error,
   } = useCollection<Event>(approvedEventsQuery);
 
-  // Fetch categories
-  const categoriesCollectionRef = useMemo(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'categories');
-  }, [firestore]);
-  
-  const categoriesQuery = useMemo(() => {
-    if(!categoriesCollectionRef) return null;
-    return query(categoriesCollectionRef, orderBy('order', 'asc'));
-  }, [categoriesCollectionRef]);
-
-  const {
-    data: categories,
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useCollection<Category>(categoriesQuery);
-
-  // Group events by category
-  const eventsByCategory = useMemo(() => {
-    if (!approvedEvents || !categories) return {};
-
-    const grouped: { [key: string]: Event[] } = {};
-    
-    // Initialize with all categories to maintain order
-    for (const category of categories) {
-        grouped[category.name] = [];
+  const filteredEvents = useMemo(() => {
+    if (!allEvents) return [];
+    if (selectedCategory === 'all') {
+      return allEvents;
     }
-
-    for (const event of approvedEvents) {
-      if (grouped[event.category]) {
-        grouped[event.category].push(event);
-      }
-    }
-
-    return grouped;
-  }, [approvedEvents, categories]);
-  
-  const loading = eventsLoading || categoriesLoading;
-  const error = eventsError || categoriesError;
+    return allEvents.filter((event) => event.category === selectedCategory);
+  }, [allEvents, selectedCategory]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-headline font-bold tracking-tight">
-          Discover Your Next Experience
-        </h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-          Browse through a curated list of events, organized by category.
-        </p>
+    <>
+      <CategoryFilter
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
+      <div className="container mx-auto px-4 py-8">
+        {loading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="flex flex-col space-y-3">
+                <Skeleton className="h-[180px] w-full rounded-xl" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {error && (
+          <div className="col-span-full text-center py-12 text-destructive">
+            <h2 className="text-2xl font-semibold">Error Loading Events</h2>
+            <p>{error.message}</p>
+          </div>
+        )}
+
+        {!loading && !error && filteredEvents.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        )}
+
+        {!loading && !error && filteredEvents.length === 0 && (
+          <div className="col-span-full text-center py-20 text-muted-foreground">
+            <h2 className="text-2xl font-semibold">No Events Found</h2>
+            <p>
+              There are no events matching the selected category. Try a
+              different one!
+            </p>
+          </div>
+        )}
       </div>
-
-      {loading && (
-         <div className="space-y-12">
-          {[...Array(3)].map((_, i) => (
-            <div key={i}>
-                <Skeleton className="h-8 w-1/4 mb-4" />
-                <div className="flex space-x-6">
-                    {[...Array(3)].map((_, j) => (
-                        <div key={j} className="flex flex-col space-y-3 w-1/3">
-                            <Skeleton className="h-[150px] w-full rounded-xl" />
-                            <div className="space-y-2">
-                                <Skeleton className="h-4 w-3/4" />
-                                <Skeleton className="h-4 w-1/2" />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {error && (
-        <p className="text-center text-destructive">
-          Error loading data: {error.message}
-        </p>
-      )}
-
-      {!loading && !error && (
-         <div className="space-y-12">
-            {categories && categories.map(category => {
-                const categoryEvents = eventsByCategory[category.name];
-                return (
-                    <Card key={category.id} className="overflow-hidden">
-                        <CardHeader>
-                            <CardTitle className="font-headline text-2xl">{category.name}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {categoryEvents && categoryEvents.length > 0 ? (
-                                <Carousel 
-                                    opts={{
-                                        align: "start",
-                                        loop: false,
-                                    }}
-                                    className="w-full"
-                                >
-                                    <CarouselContent className="-ml-4">
-                                        {categoryEvents.map((event) => (
-                                        <CarouselItem key={event.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                                            <EventCard event={event} />
-                                        </CarouselItem>
-                                        ))}
-                                    </CarouselContent>
-                                    <CarouselPrevious className="hidden sm:flex" />
-                                    <CarouselNext className="hidden sm:flex" />
-                                </Carousel>
-                            ) : (
-                                <div className="text-center py-10 text-muted-foreground">
-                                    <p>NO EVENTS. STAY TUNED FOR UPCOMING.....</p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                )
-            })}
-             {!categories || Object.keys(eventsByCategory).length === 0 && (
-                 <div className="col-span-full text-center py-12 text-muted-foreground">
-                    <h2 className="text-2xl font-semibold">No Categories Found</h2>
-                    <p>The administrator has not configured any event categories yet.</p>
-                </div>
-             )}
-         </div>
-      )}
-    </div>
+    </>
   );
 }
