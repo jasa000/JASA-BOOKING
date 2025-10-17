@@ -44,7 +44,7 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useCollection } from '@/firebase';
-import { ArrowDown, ArrowUp, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Pencil, Trash2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,6 +70,7 @@ export default function CategoriesPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [editingCategory, setEditingCategory] = React.useState<Category | null>(null);
 
   const categoriesCollectionRef = React.useMemo(() => {
     if (!firestore) return null;
@@ -99,34 +100,61 @@ export default function CategoriesPage() {
     if (!firestore) return;
     setIsSubmitting(true);
     try {
-      const categoriesCollection = collection(firestore, 'categories');
-      await addDoc(categoriesCollection, {
-        ...values,
-        createdAt: serverTimestamp(),
-      });
-      toast({
-        title: 'Category Created',
-        description: `The category "${values.name}" has been added.`,
-      });
+      if (editingCategory) {
+        // Update existing category
+        const categoryDocRef = doc(firestore, 'categories', editingCategory.id);
+        await updateDoc(categoryDocRef, values);
+        toast({
+            title: 'Category Updated',
+            description: `The category "${values.name}" has been updated.`,
+        });
+        setEditingCategory(null);
+      } else {
+        // Add new category
+        const categoriesCollection = collection(firestore, 'categories');
+        await addDoc(categoriesCollection, {
+          ...values,
+          createdAt: serverTimestamp(),
+        });
+        toast({
+          title: 'Category Created',
+          description: `The category "${values.name}" has been added.`,
+        });
+      }
       form.reset({ name: '', order: (categories?.length || 0) });
     } catch (e: any) {
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: e.message || 'Could not create category.',
+        description: e.message || `Could not ${editingCategory ? 'update' : 'create'} category.`,
       });
     } finally {
       setIsSubmitting(false);
     }
   }
+  
+  const handleEditClick = (category: Category) => {
+    setEditingCategory(category);
+    form.reset({
+        name: category.name,
+        order: category.order,
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCategory(null);
+    const maxOrder = categories ? categories.reduce((max, cat) => Math.max(max, cat.order), -1) + 1 : 0;
+    form.reset({ name: '', order: maxOrder });
+  };
+
 
   React.useEffect(() => {
-    if (categories) {
+    if (categories && !editingCategory) {
       // Set default order to be the next available number
       const maxOrder = categories.reduce((max, cat) => Math.max(max, cat.order), -1);
       form.reset({ name: '', order: maxOrder + 1 });
     }
-  }, [categories, form]);
+  }, [categories, editingCategory, form]);
 
   const handleDelete = async (categoryId: string) => {
     if (!firestore) return;
@@ -187,9 +215,9 @@ export default function CategoriesPage() {
       <div className="md:col-span-1">
         <Card>
           <CardHeader>
-            <CardTitle>Add New Category</CardTitle>
+            <CardTitle>{editingCategory ? 'Edit Category' : 'Add New Category'}</CardTitle>
             <CardDescription>
-              Create a new category for events. Use the order field to control the display sequence.
+              {editingCategory ? 'Update the name and/or order of this category.' : 'Create a new category for events. Use the order field to control the display sequence.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -221,9 +249,16 @@ export default function CategoriesPage() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Adding...' : 'Add Category'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? (editingCategory ? 'Updating...' : 'Adding...') : (editingCategory ? 'Update Category' : 'Add Category')}
+                  </Button>
+                  {editingCategory && (
+                    <Button variant="outline" type="button" onClick={handleCancelEdit}>
+                      Cancel
+                    </Button>
+                  )}
+                </div>
               </form>
             </Form>
           </CardContent>
@@ -235,7 +270,7 @@ export default function CategoriesPage() {
           <CardHeader>
             <CardTitle>Manage Categories</CardTitle>
             <CardDescription>
-              Reorder, and delete existing event categories.
+              Reorder, edit, and delete existing event categories.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -293,6 +328,13 @@ export default function CategoriesPage() {
                             disabled={index === categories.length - 1}
                           >
                             <ArrowDown className="h-4 w-4" />
+                          </Button>
+                           <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleEditClick(category)}
+                          >
+                            <Pencil className="h-4 w-4" />
                           </Button>
 
                           <AlertDialog>
