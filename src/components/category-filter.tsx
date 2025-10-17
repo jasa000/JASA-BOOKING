@@ -39,48 +39,44 @@ export function CategoryFilter({
 
   if (error) {
     return (
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container h-14 flex items-center justify-center">
-            <p className="text-sm text-destructive">Error loading categories.</p>
-        </div>
+      <div className="container h-14 flex items-center justify-center">
+          <p className="text-sm text-destructive">Error loading categories.</p>
       </div>
     );
   }
 
   return (
-    <div className="sticky top-16 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="container h-14 flex items-center gap-2 px-4">
-          <Button
-            variant={selectedCategory === 'all' ? 'secondary' : 'ghost'}
-            size="sm"
-            onClick={() => onSelectCategory('all')}
-            className="rounded-full shrink-0"
-          >
-            All
-          </Button>
-          {loading ? (
-             [...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-8 w-24 rounded-full" />
-            ))
-          ) : (
-            categories?.map((category) => (
-              <Button
-                key={category.id}
-                variant={
-                  selectedCategory === category.name ? 'secondary' : 'ghost'
-                }
-                size="sm"
-                onClick={() => onSelectCategory(category.name)}
-                className="rounded-full shrink-0"
-              >
-                {category.name}
-              </Button>
-            ))
-          )}
-        </div>
-        <ScrollBar orientation="horizontal" className="invisible" />
-      </ScrollArea>
-    </div>
+    <ScrollArea className="w-full whitespace-nowrap">
+      <div className="container h-14 flex items-center gap-2 px-4">
+        <Button
+          variant={selectedCategory === 'all' ? 'secondary' : 'ghost'}
+          size="sm"
+          onClick={() => onSelectCategory('all')}
+          className="rounded-full shrink-0"
+        >
+          All
+        </Button>
+        {loading ? (
+            [...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-8 w-24 rounded-full" />
+          ))
+        ) : (
+          categories?.map((category) => (
+            <Button
+              key={category.id}
+              variant={
+                selectedCategory === category.name ? 'secondary' : 'ghost'
+              }
+              size="sm"
+              onClick={() => onSelectCategory(category.name)}
+              className="rounded-full shrink-0"
+            >
+              {category.name}
+            </Button>
+          ))
+        )}
+      </div>
+      <ScrollBar orientation="horizontal" className="invisible" />
+    </ScrollArea>
   );
 }
