@@ -18,7 +18,13 @@ export function MainNav({
     >
       <Link href="/" className="flex items-center space-x-2">
         <span className="font-bold font-headline text-lg relative inline-block overflow-hidden whitespace-nowrap">
-          <span className="relative text-primary">JASA BOOKING</span>
+          <span className="relative text-primary bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
+            JASA BOOKING
+          </span>
+          <span
+            className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/80 to-transparent animate-shine"
+            style={{ animationDuration: '4s' }}
+          />
         </span>
       </Link>
     </nav>
