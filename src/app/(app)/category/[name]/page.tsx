@@ -7,10 +7,12 @@ import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import React, { useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useParams } from 'next/navigation';
 
-export default function CategoryPage({ params }: { params: { name: string } }) {
+export default function CategoryPage() {
   const firestore = useFirestore();
-  const categoryName = decodeURIComponent(params.name);
+  const params = useParams();
+  const categoryName = decodeURIComponent(params.name as string);
 
   // Fetch approved events for the specific category
   const eventsCollectionRef = useMemo(() => {
