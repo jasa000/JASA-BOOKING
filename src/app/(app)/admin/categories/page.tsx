@@ -13,6 +13,8 @@ import {
   doc,
   query,
   orderBy,
+  writeBatch,
+  updateDoc,
 } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
@@ -42,7 +44,7 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useCollection } from '@/firebase';
-import { Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Trash2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,9 +63,7 @@ const categoryFormSchema = z.object({
   name: z.string().min(2, {
     message: 'Category name must be at least 2 characters.',
   }),
-  order: z.coerce.number().min(0, {
-    message: 'Order must be a positive number.',
-  }),
+  order: z.coerce.number(),
 });
 
 export default function CategoriesPage() {
@@ -108,7 +108,7 @@ export default function CategoriesPage() {
         title: 'Category Created',
         description: `The category "${values.name}" has been added.`,
       });
-      form.reset({ name: '', order: (categories?.length || 0) + 1 });
+      form.reset({ name: '', order: (categories?.length || 0) });
     } catch (e: any) {
       toast({
         variant: 'destructive',
@@ -122,7 +122,9 @@ export default function CategoriesPage() {
 
   React.useEffect(() => {
     if (categories) {
-      form.reset({ name: '', order: categories.length });
+      // Set default order to be the next available number
+      const maxOrder = categories.reduce((max, cat) => Math.max(max, cat.order), -1);
+      form.reset({ name: '', order: maxOrder + 1 });
     }
   }, [categories, form]);
 
@@ -144,6 +146,42 @@ export default function CategoriesPage() {
     }
   };
 
+  const handleMove = async (currentIndex: number, direction: 'up' | 'down') => {
+    if (!firestore || !categories) return;
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+    if (targetIndex < 0 || targetIndex >= categories.length) {
+      return; // Can't move outside of bounds
+    }
+
+    const currentCategory = categories[currentIndex];
+    const targetCategory = categories[targetIndex];
+
+    // Swap the order values
+    const batch = writeBatch(firestore);
+    const currentRef = doc(firestore, 'categories', currentCategory.id);
+    const targetRef = doc(firestore, 'categories', targetCategory.id);
+    
+    batch.update(currentRef, { order: targetCategory.order });
+    batch.update(targetRef, { order: currentCategory.order });
+
+    try {
+        await batch.commit();
+        toast({
+            title: 'Category Moved',
+            description: 'The category order has been updated.',
+        });
+    } catch (e: any) {
+         toast({
+            variant: 'destructive',
+            title: 'Uh oh! Something went wrong.',
+            description: e.message || 'Could not move category.',
+        });
+    }
+  };
+
+
   return (
     <div className="container mx-auto px-4 py-8 grid gap-8 md:grid-cols-3">
       <div className="md:col-span-1">
@@ -151,7 +189,7 @@ export default function CategoriesPage() {
           <CardHeader>
             <CardTitle>Add New Category</CardTitle>
             <CardDescription>
-              Create a new category for events. The order determines the display sequence on the homepage.
+              Create a new category for events. Use the order field to control the display sequence.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -197,7 +235,7 @@ export default function CategoriesPage() {
           <CardHeader>
             <CardTitle>Manage Categories</CardTitle>
             <CardDescription>
-              View and delete existing event categories.
+              Reorder, and delete existing event categories.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -219,7 +257,7 @@ export default function CategoriesPage() {
                           <Skeleton className="h-4 w-32" />
                         </TableCell>
                         <TableCell className="text-right">
-                          <Skeleton className="h-8 w-8 rounded-md ml-auto" />
+                          <Skeleton className="h-8 w-20 rounded-md ml-auto" />
                         </TableCell>
                       </TableRow>
                     ))
@@ -233,13 +271,30 @@ export default function CategoriesPage() {
                       </TableCell>
                     </TableRow>
                   ) : categories && categories.length > 0 ? (
-                    categories.map((category) => (
+                    categories.map((category, index) => (
                       <TableRow key={category.id}>
                         <TableCell className="font-mono">{category.order}</TableCell>
                         <TableCell className="font-medium">
                           {category.name}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right space-x-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleMove(index, 'up')}
+                            disabled={index === 0}
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleMove(index, 'down')}
+                            disabled={index === categories.length - 1}
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="ghost" size="icon">
