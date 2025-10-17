@@ -10,7 +10,7 @@ import { ScrollArea, ScrollBar } from "./ui/scroll-area"
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
+    <header className="sticky top-0 z-40 w-full border-b bg-background overflow-hidden animate-shine">
       <div className="container px-4 md:px-6">
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex h-16 items-center justify-between gap-4">
