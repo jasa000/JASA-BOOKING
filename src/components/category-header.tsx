@@ -47,14 +47,13 @@ export function CategoryHeader() {
     <div className="border-b bg-background sticky top-16 z-30">
         <ScrollArea className="w-full whitespace-nowrap">
         <div className="container h-14 flex items-center gap-2 px-4">
-            <Link href="/" legacyBehavior passHref>
+            <Link href="/" passHref>
                 <Button
-                    asChild
                     variant={isActive('/') ? 'secondary' : 'ghost'}
                     size="sm"
                     className="rounded-full shrink-0"
                     >
-                    <a>All</a>
+                    All
                 </Button>
             </Link>
             {loading ? (
@@ -65,14 +64,13 @@ export function CategoryHeader() {
             categories?.map((category) => {
                 const categoryPath = `/category/${encodeURIComponent(category.name)}`;
                 return (
-                    <Link key={category.id} href={categoryPath} legacyBehavior passHref>
+                    <Link key={category.id} href={categoryPath} passHref>
                         <Button
-                            asChild
                             variant={isActive(categoryPath) ? 'secondary' : 'ghost'}
                             size="sm"
                             className="rounded-full shrink-0"
                         >
-                            <a>{category.name}</a>
+                            {category.name}
                         </Button>
                     </Link>
                 );
