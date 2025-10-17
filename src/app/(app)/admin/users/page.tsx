@@ -24,16 +24,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useCollection, useFirestore } from '@/firebase';
-import { collection, query } from 'firebase/firestore';
+import { collection, query, doc, updateDoc } from 'firebase/firestore';
 import React, { useState, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { UserShield } from 'lucide-react';
 import type { UserProfile } from '@/lib/types';
+import { Label } from '@/components/ui/label';
+
+const ADMIN_SECRET_CODE = "AD642531";
 
 export default function ManageUsersPage() {
   const firestore = useFirestore();
+  const { toast } = useToast();
   const [roleFilter, setRoleFilter] = useState('all');
+  const [secretCode, setSecretCode] = useState('');
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const usersCollectionRef = useMemo(() => {
     if (!firestore) return null;
@@ -56,6 +78,41 @@ export default function ManageUsersPage() {
     if (roleFilter === 'all') return allUsers;
     return allUsers.filter((user) => user.role === roleFilter);
   }, [allUsers, roleFilter]);
+  
+  const handleUpgradeRole = async () => {
+    if (!firestore || !selectedUser) return;
+
+    if (secretCode !== ADMIN_SECRET_CODE) {
+        toast({
+            variant: "destructive",
+            title: "Incorrect Secret Code",
+            description: "The secret code you entered is not valid. Please try again.",
+        });
+        setSecretCode('');
+        return;
+    }
+    
+    setIsUpdating(true);
+    const userDocRef = doc(firestore, 'users', selectedUser.uid);
+    try {
+        await updateDoc(userDocRef, { role: 'admin' });
+        toast({
+            title: "User Role Updated",
+            description: `${selectedUser.displayName || selectedUser.email} has been promoted to Admin.`,
+        });
+        setSelectedUser(null);
+        setSecretCode('');
+    } catch (e: any) {
+        toast({
+            variant: "destructive",
+            title: "Update Failed",
+            description: e.message || "Could not update the user's role.",
+        });
+    } finally {
+        setIsUpdating(false);
+    }
+  }
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -88,6 +145,7 @@ export default function ManageUsersPage() {
                   <TableHead>User</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -106,12 +164,15 @@ export default function ManageUsersPage() {
                       <TableCell>
                         <Skeleton className="h-6 w-16 rounded-full" />
                       </TableCell>
+                       <TableCell className="text-right">
+                        <Skeleton className="h-8 w-24 rounded-md ml-auto" />
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : error ? (
                   <TableRow>
                     <TableCell
-                      colSpan={3}
+                      colSpan={4}
                       className="h-24 text-center text-destructive"
                     >
                       Error loading users: {error.message}
@@ -139,11 +200,47 @@ export default function ManageUsersPage() {
                           {user.role}
                         </Badge>
                       </TableCell>
+                       <TableCell className="text-right">
+                        {user.role === 'user' && (
+                           <AlertDialog onOpenChange={(open) => !open && setSelectedUser(null)}>
+                            <AlertDialogTrigger asChild>
+                               <Button variant="outline" size="sm" onClick={() => setSelectedUser(user)}>
+                                 <UserShield className="mr-2 h-4 w-4" />
+                                 Make Admin
+                               </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirm Role Change</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  To upgrade <span className="font-bold">{user.displayName || user.email}</span> to an Admin role, please enter the secret code.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <div className="space-y-2">
+                                <Label htmlFor="secret-code">Admin Secret Code</Label>
+                                <Input 
+                                    id="secret-code"
+                                    type="password"
+                                    value={secretCode}
+                                    onChange={(e) => setSecretCode(e.target.value)}
+                                    placeholder="Enter secret code"
+                                />
+                              </div>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleUpgradeRole} disabled={isUpdating || !secretCode}>
+                                    {isUpdating ? "Upgrading..." : "Upgrade Role"}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={3} className="h-24 text-center">
+                    <TableCell colSpan={4} className="h-24 text-center">
                       No users found.
                     </TableCell>
                   </TableRow>
