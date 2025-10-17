@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -17,6 +18,17 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { CheckCircle, XCircle } from 'lucide-react';
 import { useCollection, useFirestore } from '@/firebase';
 import {
@@ -119,24 +131,61 @@ export default function AdminPage() {
                         <Badge variant="secondary">{event.category}</Badge>
                       </TableCell>
                       <TableCell className="text-right space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-green-500 hover:text-green-600"
-                          onClick={() => handleEventStatusChange(event.id, 'approved')}
-                        >
-                          <CheckCircle className="h-5 w-5" />
-                          <span className="sr-only">Approve</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-500 hover:text-red-600"
-                           onClick={() => handleEventStatusChange(event.id, 'rejected')}
-                        >
-                          <XCircle className="h-5 w-5" />
-                          <span className="sr-only">Reject</span>
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-green-500 hover:text-green-600"
+                            >
+                              <CheckCircle className="h-5 w-5" />
+                              <span className="sr-only">Approve</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Approve Event?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to approve the event "{event.title}"?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleEventStatusChange(event.id, 'approved')}>
+                                Approve
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-red-500 hover:text-red-600"
+                            >
+                              <XCircle className="h-5 w-5" />
+                              <span className="sr-only">Reject</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                           <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Reject Event?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to reject the event "{event.title}"? This cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive hover:bg-destructive/90"
+                                onClick={() => handleEventStatusChange(event.id, 'rejected')}
+                              >
+                                Reject
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </TableCell>
                     </TableRow>
                   ))

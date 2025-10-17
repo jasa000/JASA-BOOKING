@@ -157,8 +157,6 @@ export default function InstitutionsPage() {
       const allPreviews = [...imagePreviews, ...newPreviews];
       setImagePreviews(allPreviews);
 
-      // We need to update the form's imageUrls so validation can pass
-      // We will use the previews as temporary URLs for now
       form.setValue('imageUrls', allPreviews, { shouldValidate: true });
       if (form.getValues('mainImageUrl') === '' && allPreviews.length > 0) {
         form.setValue('mainImageUrl', allPreviews[0], { shouldValidate: true });
@@ -191,17 +189,19 @@ export default function InstitutionsPage() {
     form.setValue('mainImageUrl', url, { shouldValidate: true });
   };
   
-  async function onSubmit(values: z.infer<typeof institutionFormSchema>) {
+  async function performSubmit(values: z.infer<typeof institutionFormSchema>) {
     if (!firestore) return;
     setIsSubmitting(true);
   
     try {
+      setIsUploading(true);
+      const newFilesToUpload = imageFiles.filter(file => file instanceof File);
       let uploadedUrls: string[] = [];
-      if (imageFiles.length > 0) {
-        setIsUploading(true);
-        toast({ title: 'Uploading Images', description: `Uploading ${imageFiles.length} new image(s)...` });
+  
+      if (newFilesToUpload.length > 0) {
+        toast({ title: 'Uploading Images', description: `Uploading ${newFilesToUpload.length} new image(s)...` });
         
-        const uploadPromises = imageFiles.map(file => uploadImage(file).catch(e => {
+        const uploadPromises = newFilesToUpload.map(file => uploadImage(file).catch(e => {
           console.error("Upload failed for a file", e);
           toast({ variant: 'destructive', title: 'Upload Failed', description: `Could not upload ${file.name}` });
           return null;
@@ -209,8 +209,8 @@ export default function InstitutionsPage() {
         
         const results = await Promise.all(uploadPromises);
         uploadedUrls = results.filter((url): url is string => url !== null);
-        setIsUploading(false);
       }
+      setIsUploading(false);
   
       const existingUrls = values.imageUrls.filter(url => !url.startsWith('blob:'));
       const finalImageUrls = [...existingUrls, ...uploadedUrls];
@@ -224,11 +224,8 @@ export default function InstitutionsPage() {
       let finalMainImageUrl = values.mainImageUrl;
       if (values.mainImageUrl.startsWith('blob:')) {
         const blobIndex = imagePreviews.filter(p => p.startsWith('blob:')).indexOf(values.mainImageUrl);
-        if (blobIndex !== -1 && uploadedUrls[blobIndex]) {
-          finalMainImageUrl = uploadedUrls[blobIndex];
-        } else {
-          finalMainImageUrl = finalImageUrls[0];
-        }
+        const correspondingUploadedUrl = uploadedUrls[blobIndex];
+        finalMainImageUrl = correspondingUploadedUrl || finalImageUrls[0];
       } else if (!finalImageUrls.includes(values.mainImageUrl)) {
         finalMainImageUrl = finalImageUrls[0];
       }
@@ -261,6 +258,10 @@ export default function InstitutionsPage() {
       setImageFiles([]);
     }
   }
+
+  const onSubmit = (values: z.infer<typeof institutionFormSchema>) => {
+    // This function will now only trigger the dialog
+  };
 
   const handleDelete = async (institutionId: string) => {
     if (!firestore) return;
@@ -322,43 +323,43 @@ export default function InstitutionsPage() {
                   <FormMessage>{form.formState.errors.imageUrls?.message}</FormMessage>
 
                   <div className="grid grid-cols-3 gap-2 mt-4">
-                  {imagePreviews.map((url, index) => (
-                    <div key={url} className="relative group aspect-square">
-                        <Image src={url} alt={`Preview ${index}`} fill className="object-cover rounded-md" />
-                        {isUploading && url.startsWith('blob:') ? (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                            <Loader2 className="h-5 w-5 text-white animate-spin" />
-                        </div>
-                        ) : (
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 rounded-md">
-                            <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-white" onClick={() => setAsMainImage(url)}>
-                                <Star className={cn("h-4 w-4", watchedMainImageUrl === url && "fill-yellow-400 text-yellow-400")} />
-                            </Button>
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-destructive">
-                                    <X className="h-4 w-4" />
-                                </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                    This will remove the image from the selection. This action cannot be undone.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => removeImage(index, url)}>
-                                    Remove
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        </div>
-                        )}
-                    </div>
-                    ))}
+                    {imagePreviews?.map((url, index) => (
+                      <div key={url} className="relative group aspect-square">
+                          <Image src={url} alt={`Preview ${index}`} fill className="object-cover rounded-md" />
+                          {isUploading && url.startsWith('blob:') ? (
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                              <Loader2 className="h-5 w-5 text-white animate-spin" />
+                          </div>
+                          ) : (
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 rounded-md">
+                              <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-white" onClick={() => setAsMainImage(url)}>
+                                  <Star className={cn("h-4 w-4", watchedMainImageUrl === url && "fill-yellow-400 text-yellow-400")} />
+                              </Button>
+                              <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                  <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-destructive">
+                                      <X className="h-4 w-4" />
+                                  </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                      This will remove the image from the selection. This action cannot be undone.
+                                      </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => removeImage(index, url)}>
+                                      Remove
+                                      </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                  </AlertDialogContent>
+                              </AlertDialog>
+                          </div>
+                          )}
+                      </div>
+                      ))}
                   </div>
                   <FormMessage>{form.formState.errors.mainImageUrl?.message}</FormMessage>
                 </FormItem>
@@ -408,9 +409,28 @@ export default function InstitutionsPage() {
                 )} />
 
                 <div className="flex gap-2">
-                  <Button type="submit" disabled={isSubmitting || isUploading}>
-                    {isSubmitting ? (editingInstitution ? 'Updating...' : 'Adding...') : (editingInstitution ? 'Update Institution' : 'Add Institution')}
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                       <Button type="button" disabled={isSubmitting || isUploading || !form.formState.isValid}>
+                        {isSubmitting ? (editingInstitution ? 'Updating...' : 'Adding...') : (editingInstitution ? 'Update Institution' : 'Add Institution')}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                       <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will {editingInstitution ? 'update the' : 'create a new'} institution.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => performSubmit(form.getValues())}>
+                          Confirm
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
                   {editingInstitution && (
                     <Button variant="outline" type="button" onClick={handleCancelEdit}>Cancel</Button>
                   )}

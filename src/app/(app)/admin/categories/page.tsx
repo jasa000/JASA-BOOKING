@@ -96,7 +96,7 @@ export default function CategoriesPage() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof categoryFormSchema>) {
+  async function performSubmit(values: z.infer<typeof categoryFormSchema>) {
     if (!firestore) return;
     setIsSubmitting(true);
     try {
@@ -132,6 +132,10 @@ export default function CategoriesPage() {
       setIsSubmitting(false);
     }
   }
+
+  const onSubmit = (values: z.infer<typeof categoryFormSchema>) => {
+    // This function will now only trigger the dialog
+  };
   
   const handleEditClick = (category: Category) => {
     setEditingCategory(category);
@@ -250,9 +254,28 @@ export default function CategoriesPage() {
                   )}
                 />
                 <div className="flex gap-2">
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? (editingCategory ? 'Updating...' : 'Adding...') : (editingCategory ? 'Update Category' : 'Add Category')}
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button type="button" disabled={isSubmitting || !form.formState.isValid}>
+                        {editingCategory ? 'Update Category' : 'Add Category'}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will {editingCategory ? 'update the' : 'create a new'} category.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => performSubmit(form.getValues())}>
+                          {isSubmitting ? (editingCategory ? 'Updating...' : 'Adding...') : 'Confirm'}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
                   {editingCategory && (
                     <Button variant="outline" type="button" onClick={handleCancelEdit}>
                       Cancel

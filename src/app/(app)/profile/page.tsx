@@ -247,7 +247,7 @@ export default function ProfilePage() {
     }
   }
   
-  const onSubmit = async (data: ProfileFormValues) => {
+  const performSubmit = async (data: ProfileFormValues) => {
     if (!userDocRef) return;
     setIsSubmitting(true);
     try {
@@ -260,6 +260,7 @@ export default function ProfilePage() {
         title: "Profile Updated",
         description: "Your information has been saved successfully.",
       });
+      form.reset(data); // to mark form as not dirty
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -269,6 +270,10 @@ export default function ProfilePage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+  
+  const onSubmit = async (data: ProfileFormValues) => {
+    // This function only triggers the dialog
   };
 
   const handlePasswordReset = async () => {
@@ -558,9 +563,28 @@ export default function ProfilePage() {
                   )}
                 />
 
-                <Button type="submit" disabled={isSubmitting || !form.formState.isDirty}>
-                  {isSubmitting ? "Saving..." : "Save Changes"}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                     <Button type="button" disabled={isSubmitting || !form.formState.isDirty}>
+                      {isSubmitting ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirm Changes</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to save these changes to your profile?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => performSubmit(form.getValues())}>
+                        Save
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
               </form>
             </Form>
           </CardContent>
