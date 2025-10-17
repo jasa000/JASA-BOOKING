@@ -33,3 +33,8 @@ export type Category = {
   name: string;
   order: number;
 };
+
+export type Institution = {
+  id: string;
+  name: string;
+};

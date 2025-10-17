@@ -85,6 +85,18 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["title", "description", "location", "date", "category", "imageUrl", "organizerId", "status"]
+    },
+    "Institution": {
+      "title": "Institution",
+      "description": "Represents a school, college, or other organization.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the institution."
+        }
+      },
+      "required": ["name"]
     }
   },
   "auth": {
@@ -102,6 +114,10 @@
     "/categories/{categoryId}": {
       "schema": { "$ref": "#/entities/Category" },
       "description": "Stores the list of event categories."
+    },
+    "/institutions/{institutionId}": {
+      "schema": { "$ref": "#/entities/Institution" },
+      "description": "Stores the list of institutions."
     }
   }
 }
