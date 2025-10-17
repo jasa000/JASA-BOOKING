@@ -88,6 +88,13 @@ export function AdminMenu() {
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
+               <MenubarMenu>
+                <Link href="/admin/photos">
+                    <MenubarTrigger className="cursor-pointer">
+                        Manage Photos
+                    </MenubarTrigger>
+                </Link>
+              </MenubarMenu>
             </Menubar>
         </div>
          <ScrollBar orientation="horizontal" className="invisible" />
