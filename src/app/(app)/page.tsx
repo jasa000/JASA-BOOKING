@@ -1,28 +1,23 @@
 
 'use client';
 
-import type { Event } from '@/lib/types';
+import type { Event, Category } from '@/lib/types';
 import { EventCard } from '@/components/event-card';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 import { useCollection, useFirestore } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query, where, orderBy } from 'firebase/firestore';
 import React, { useState, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 export default function EventsPage() {
   const firestore = useFirestore();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
+  // Fetch approved events
   const eventsCollectionRef = useMemo(() => {
     if (!firestore) return null;
     return collection(firestore, 'events');
@@ -30,44 +25,54 @@ export default function EventsPage() {
 
   const approvedEventsQuery = useMemo(() => {
     if (!eventsCollectionRef) return null;
-    // Query only for status to avoid composite index. Sorting will be done client-side.
-    return query(
-      eventsCollectionRef,
-      where('status', '==', 'approved')
-    );
+    return query(eventsCollectionRef, where('status', '==', 'approved'));
   }, [eventsCollectionRef]);
 
   const {
     data: approvedEvents,
-    loading,
-    error,
+    loading: eventsLoading,
+    error: eventsError,
   } = useCollection<Event>(approvedEventsQuery);
+
+  // Fetch categories
+  const categoriesCollectionRef = useMemo(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'categories');
+  }, [firestore]);
   
+  const categoriesQuery = useMemo(() => {
+    if(!categoriesCollectionRef) return null;
+    return query(categoriesCollectionRef, orderBy('name', 'asc'));
+  }, [categoriesCollectionRef]);
+
+  const {
+    data: categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+  } = useCollection<Category>(categoriesQuery);
+
+  // Client-side filtering
   const filteredEvents = useMemo(() => {
     if (!approvedEvents) return [];
-    
-    // Client-side filtering and sorting
+
     return approvedEvents
-      .filter(event => {
-        const matchesCategory = categoryFilter === 'all' || event.category === categoryFilter;
-        const matchesSearch = 
+      .filter((event) => {
+        const matchesCategory =
+          categoryFilter === 'all' || event.category === categoryFilter;
+        const matchesSearch =
           event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           event.location.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesSearch;
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
   }, [approvedEvents, searchTerm, categoryFilter]);
 
-  const categories = useMemo(() => {
-    if (!approvedEvents) return [];
-    const allCategories = approvedEvents.map((event) => event.category);
-    return [...new Set(allCategories)];
-  }, [approvedEvents]);
+  const loading = eventsLoading || categoriesLoading;
+  const error = eventsError || categoriesError;
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-12">
+      <div className="text-center mb-8">
         <h1 className="text-4xl md:text-5xl font-headline font-bold tracking-tight">
           Discover Your Next Experience
         </h1>
@@ -77,8 +82,8 @@ export default function EventsPage() {
         </p>
       </div>
 
-      <div className="mb-8 p-4 border rounded-lg bg-card flex flex-col md:flex-row items-center gap-4">
-        <div className="relative w-full md:flex-1">
+      <div className="mb-8 p-4 border rounded-lg bg-card sticky top-[65px] z-30">
+        <div className="relative w-full mb-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             placeholder="Search by event title or location..."
@@ -87,21 +92,33 @@ export default function EventsPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="All Categories" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-2 px-2">
+           <Button
+              variant={categoryFilter === 'all' ? 'default' : 'outline'}
+              className="rounded-full shrink-0"
+              onClick={() => setCategoryFilter('all')}
+            >
+              All
+            </Button>
+          {categoriesLoading ? (
+             [...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-9 w-24 rounded-full" />
+              ))
+          ) : (
+            categories?.map((category) => (
+              <Button
+                key={category.id}
+                variant={categoryFilter === category.name ? 'default' : 'outline'}
+                className="rounded-full shrink-0"
+                onClick={() => setCategoryFilter(category.name)}
+              >
+                {category.name}
+              </Button>
+            ))
+          )}
+        </div>
       </div>
-
+      
       {loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {[...Array(4)].map((_, i) => (
@@ -118,7 +135,7 @@ export default function EventsPage() {
 
       {error && (
         <p className="text-center text-destructive">
-          Error loading events: {error.message}
+          Error loading data: {error.message}
         </p>
       )}
 

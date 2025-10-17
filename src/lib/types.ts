@@ -27,3 +27,8 @@ export type Event = {
   status: 'pending' | 'approved' | 'rejected';
   category: string;
 };
+
+export type Category = {
+  id: string;
+  name: string;
+};

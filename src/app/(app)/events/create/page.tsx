@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { CalendarIcon, Upload } from "lucide-react"
+import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import React from "react"
 
@@ -37,8 +37,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { uploadImage } from "@/lib/cloudinary"
-import { useUser, useFirestore } from "@/firebase"
-import { collection, addDoc, serverTimestamp } from "firebase/firestore"
+import { useUser, useFirestore, useCollection } from "@/firebase"
+import { collection, addDoc, serverTimestamp, query, orderBy } from "firebase/firestore"
+import type { Category } from "@/lib/types"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -74,6 +75,18 @@ export default function CreateEventPage() {
   const { user } = useUser();
   const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const categoriesCollectionRef = React.useMemo(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'categories');
+  }, [firestore]);
+
+  const categoriesQuery = React.useMemo(() => {
+    if(!categoriesCollectionRef) return null;
+    return query(categoriesCollectionRef, orderBy('name', 'asc'));
+  }, [categoriesCollectionRef]);
+
+  const { data: categories, loading: categoriesLoading } = useCollection<Category>(categoriesQuery);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -127,9 +140,6 @@ export default function CreateEventPage() {
       setIsSubmitting(false);
     }
   }
-  
-  // Example categories, you might fetch these from Firestore as well
-  const categories = ["Technology", "Music", "Workshop", "Business", "Community", "Arts", "Wellness"];
 
 
   return (
@@ -256,12 +266,12 @@ export default function CreateEventPage() {
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select an event category" />
+                            <SelectValue placeholder={categoriesLoading ? "Loading..." : "Select an event category"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {categories.map(category => (
-                            <SelectItem key={category} value={category}>{category}</SelectItem>
+                          {!categoriesLoading && categories?.map(category => (
+                            <SelectItem key={category.id} value={category.name}>{category.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>

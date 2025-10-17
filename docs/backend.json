@@ -51,6 +51,36 @@
         }
       },
       "required": ["uid", "email"]
+    },
+    "Category": {
+      "title": "Event Category",
+      "description": "Represents a category for an event.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the category."
+        }
+      },
+      "required": ["name"]
+    },
+    "Event": {
+      "title": "Event",
+      "description": "Represents an event created by a user.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "location": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "category": { "type": "string" },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "organizer": { "type": "string" },
+        "organizerId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "location", "date", "category", "imageUrl", "organizerId", "status"]
     }
   },
   "auth": {
@@ -60,6 +90,14 @@
     "/users/{userId}": {
       "schema": { "$ref": "#/entities/UserProfile" },
       "description": "Stores public profile information for each user."
+    },
+    "/events/{eventId}": {
+      "schema": { "$ref": "#/entities/Event" },
+      "description": "Stores all event data."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Stores the list of event categories."
     }
   }
 }

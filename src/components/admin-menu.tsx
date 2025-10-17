@@ -65,6 +65,13 @@ export function AdminMenu() {
                 </MenubarTrigger>
              </Link>
           </MenubarMenu>
+          <MenubarMenu>
+             <Link href="/admin/categories" legacyBehavior={false}>
+                <MenubarTrigger className="cursor-pointer">
+                    Categories
+                </MenubarTrigger>
+             </Link>
+          </MenubarMenu>
         </Menubar>
       </div>
     </div>
