@@ -43,11 +43,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, ShieldOff } from 'lucide-react';
 import type { UserProfile } from '@/lib/types';
 import { Label } from '@/components/ui/label';
 
 const ADMIN_SECRET_CODE = "AD642531";
+const USER_SECRET_CODE = "US642531";
 
 export default function ManageUsersPage() {
   const firestore = useFirestore();
@@ -55,6 +56,7 @@ export default function ManageUsersPage() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [secretCode, setSecretCode] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [actionType, setActionType] = useState<'promote' | 'demote' | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const usersCollectionRef = useMemo(() => {
@@ -79,10 +81,13 @@ export default function ManageUsersPage() {
     return allUsers.filter((user) => user.role === roleFilter);
   }, [allUsers, roleFilter]);
   
-  const handleUpgradeRole = async () => {
-    if (!firestore || !selectedUser) return;
+  const handleRoleChange = async () => {
+    if (!firestore || !selectedUser || !actionType) return;
 
-    if (secretCode !== ADMIN_SECRET_CODE) {
+    const targetRole = actionType === 'promote' ? 'admin' : 'user';
+    const requiredCode = actionType === 'promote' ? ADMIN_SECRET_CODE : USER_SECRET_CODE;
+    
+    if (secretCode !== requiredCode) {
         toast({
             variant: "destructive",
             title: "Incorrect Secret Code",
@@ -95,13 +100,14 @@ export default function ManageUsersPage() {
     setIsUpdating(true);
     const userDocRef = doc(firestore, 'users', selectedUser.uid);
     try {
-        await updateDoc(userDocRef, { role: 'admin' });
+        await updateDoc(userDocRef, { role: targetRole });
         toast({
             title: "User Role Updated",
-            description: `${selectedUser.displayName || selectedUser.email} has been promoted to Admin.`,
+            description: `${selectedUser.displayName || selectedUser.email} has been ${actionType === 'promote' ? 'promoted to Admin' : 'demoted to User'}.`,
         });
         setSelectedUser(null);
         setSecretCode('');
+        setActionType(null);
     } catch (e: any) {
         toast({
             variant: "destructive",
@@ -201,23 +207,37 @@ export default function ManageUsersPage() {
                         </Badge>
                       </TableCell>
                        <TableCell className="text-right">
-                        {user.role === 'user' && (
-                           <AlertDialog onOpenChange={(open) => !open && setSelectedUser(null)}>
-                            <AlertDialogTrigger asChild>
-                               <Button variant="outline" size="sm" onClick={() => setSelectedUser(user)}>
-                                 <ShieldCheck className="mr-2 h-4 w-4" />
-                                 Make Admin
-                               </Button>
-                            </AlertDialogTrigger>
+                        <AlertDialog onOpenChange={(open) => {if (!open) { setSelectedUser(null); setActionType(null); setSecretCode(''); }}}>
+                            {user.role === 'user' ? (
+                                <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" onClick={() => { setSelectedUser(user); setActionType('promote'); }}>
+                                    <ShieldCheck className="mr-2 h-4 w-4" />
+                                    Make Admin
+                                </Button>
+                                </AlertDialogTrigger>
+                            ) : (
+                                <AlertDialogTrigger asChild>
+                                <Button variant="destructive" size="sm" onClick={() => { setSelectedUser(user); setActionType('demote'); }}>
+                                    <ShieldOff className="mr-2 h-4 w-4" />
+                                    Make User
+                                </Button>
+                                </AlertDialogTrigger>
+                            )}
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Confirm Role Change</AlertDialogTitle>
+                                {actionType === 'promote' ? (
                                 <AlertDialogDescription>
-                                  To upgrade <span className="font-bold">{user.displayName || user.email}</span> to an Admin role, please enter the secret code.
+                                  To upgrade <span className="font-bold">{selectedUser?.displayName || selectedUser?.email}</span> to an Admin role, please enter the secret code.
                                 </AlertDialogDescription>
+                                ) : (
+                                <AlertDialogDescription>
+                                   To downgrade <span className="font-bold">{selectedUser?.displayName || selectedUser?.email}</span> to a User role, please enter the secret code.
+                                </AlertDialogDescription>
+                                )}
                               </AlertDialogHeader>
                               <div className="space-y-2">
-                                <Label htmlFor="secret-code">Admin Secret Code</Label>
+                                <Label htmlFor="secret-code">Secret Code</Label>
                                 <Input 
                                     id="secret-code"
                                     type="password"
@@ -228,13 +248,12 @@ export default function ManageUsersPage() {
                               </div>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleUpgradeRole} disabled={isUpdating || !secretCode}>
-                                    {isUpdating ? "Upgrading..." : "Upgrade Role"}
+                                <AlertDialogAction onClick={handleRoleChange} disabled={isUpdating || !secretCode}>
+                                    {isUpdating ? "Updating..." : "Confirm Role Change"}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
-                          </AlertDialog>
-                        )}
+                        </AlertDialog>
                       </TableCell>
                     </TableRow>
                   ))
