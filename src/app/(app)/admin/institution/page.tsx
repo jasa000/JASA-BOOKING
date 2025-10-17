@@ -170,7 +170,6 @@ export default function InstitutionsPage() {
     const isLocalBlob = url.startsWith('blob:');
 
     if (isLocalBlob) {
-        // It's a newly added file (not yet uploaded)
         const fileIndex = imagePreviews.filter(p => p.startsWith('blob:')).indexOf(url);
         if (fileIndex > -1) {
             const newImageFiles = imageFiles.filter((_, i) => i !== fileIndex);
@@ -195,58 +194,51 @@ export default function InstitutionsPage() {
   async function onSubmit(values: z.infer<typeof institutionFormSchema>) {
     if (!firestore) return;
     setIsSubmitting(true);
-    setIsUploading(true);
-
+  
     try {
-        let finalImageUrls = values.imageUrls.filter(url => !url.startsWith('blob:'));
+      let uploadedUrls: string[] = [];
+      if (imageFiles.length > 0) {
+        setIsUploading(true);
+        toast({ title: 'Uploading Images', description: `Uploading ${imageFiles.length} new image(s)...` });
         
-        if (imageFiles.length > 0) {
-            toast({ title: 'Uploading Images', description: `Uploading ${imageFiles.length} new image(s)...` });
-            const uploadedUrls = await Promise.all(
-              imageFiles.map(file => uploadImage(file).catch(e => {
-                console.error("Upload failed for a file", e);
-                toast({variant: 'destructive', title: 'Upload Failed', description: `Could not upload ${file.name}`});
-                return null;
-              }))
-            );
-            const successfulUrls = uploadedUrls.filter((url): url is string => url !== null);
-            finalImageUrls = [...finalImageUrls, ...successfulUrls];
-        }
+        const uploadPromises = imageFiles.map(file => uploadImage(file).catch(e => {
+          console.error("Upload failed for a file", e);
+          toast({ variant: 'destructive', title: 'Upload Failed', description: `Could not upload ${file.name}` });
+          return null;
+        }));
         
+        const results = await Promise.all(uploadPromises);
+        uploadedUrls = results.filter((url): url is string => url !== null);
         setIsUploading(false);
-
-        if (finalImageUrls.length === 0) {
-            form.setError('imageUrls', { message: 'Please upload at least one image.'});
-            setIsSubmitting(false);
-            return;
+      }
+  
+      const existingUrls = values.imageUrls.filter(url => !url.startsWith('blob:'));
+      const finalImageUrls = [...existingUrls, ...uploadedUrls];
+  
+      if (finalImageUrls.length === 0) {
+        form.setError('imageUrls', { message: 'Please upload at least one image.' });
+        setIsSubmitting(false);
+        return;
+      }
+  
+      let finalMainImageUrl = values.mainImageUrl;
+      if (values.mainImageUrl.startsWith('blob:')) {
+        const blobIndex = imagePreviews.filter(p => p.startsWith('blob:')).indexOf(values.mainImageUrl);
+        if (blobIndex !== -1 && uploadedUrls[blobIndex]) {
+          finalMainImageUrl = uploadedUrls[blobIndex];
+        } else {
+          finalMainImageUrl = finalImageUrls[0];
         }
-
-        // Map the blob URL of the main image to its final uploaded URL
-        let finalMainImageUrl = values.mainImageUrl;
-        if (values.mainImageUrl.startsWith('blob:')) {
-            const previewIndex = imagePreviews.indexOf(values.mainImageUrl);
-            const blobIndex = imagePreviews.filter(p => p.startsWith('blob:')).indexOf(values.mainImageUrl);
-            
-            // Find the corresponding final URL
-            const finalUrl = finalImageUrls.find(url => !values.imageUrls.includes(url));
-            // This is brittle. A better way: map blob urls to final urls.
-            const uploadedUrls = finalImageUrls.slice(values.imageUrls.filter(u => !u.startsWith('blob:')).length);
-            if (uploadedUrls[blobIndex]) {
-                finalMainImageUrl = uploadedUrls[blobIndex];
-            } else {
-                finalMainImageUrl = finalImageUrls[0]; // fallback
-            }
-        } else if (!finalImageUrls.includes(values.mainImageUrl)) {
-             finalMainImageUrl = finalImageUrls[0];
-        }
-
-
+      } else if (!finalImageUrls.includes(values.mainImageUrl)) {
+        finalMainImageUrl = finalImageUrls[0];
+      }
+  
       const dataToSave = {
         ...values,
         imageUrls: finalImageUrls,
         mainImageUrl: finalMainImageUrl,
       };
-
+  
       if (editingInstitution) {
         const institutionDocRef = doc(firestore, 'institutions', editingInstitution.id);
         await updateDoc(institutionDocRef, dataToSave);
@@ -330,24 +322,42 @@ export default function InstitutionsPage() {
                   <FormMessage>{form.formState.errors.imageUrls?.message}</FormMessage>
 
                   <div className="grid grid-cols-3 gap-2 mt-4">
-                    {imagePreviews.map((url, index) => (
-                      <div key={url} className="relative group aspect-square">
+                  {imagePreviews.map((url, index) => (
+                    <div key={url} className="relative group aspect-square">
                         <Image src={url} alt={`Preview ${index}`} fill className="object-cover rounded-md" />
-                         {isUploading && url.startsWith('blob:') ? (
-                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                               <Loader2 className="h-5 w-5 text-white animate-spin" />
-                            </div>
-                         ) : (
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 rounded-md">
-                                <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-white" onClick={() => setAsMainImage(url)}>
-                                    <Star className={cn("h-4 w-4", watchedMainImageUrl === url && "fill-yellow-400 text-yellow-400")} />
-                                </Button>
-                                <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeImage(index, url)}>
+                        {isUploading && url.startsWith('blob:') ? (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <Loader2 className="h-5 w-5 text-white animate-spin" />
+                        </div>
+                        ) : (
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 rounded-md">
+                            <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-white" onClick={() => setAsMainImage(url)}>
+                                <Star className={cn("h-4 w-4", watchedMainImageUrl === url && "fill-yellow-400 text-yellow-400")} />
+                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-destructive">
                                     <X className="h-4 w-4" />
                                 </Button>
-                            </div>
-                         )}
-                      </div>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                    This will remove the image from the selection. This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => removeImage(index, url)}>
+                                    Remove
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                        )}
+                    </div>
                     ))}
                   </div>
                   <FormMessage>{form.formState.errors.mainImageUrl?.message}</FormMessage>
