@@ -7,7 +7,6 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import type { Category } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 interface CategoryFilterProps {
@@ -47,7 +46,7 @@ export function CategoryFilter({
 
   return (
     <ScrollArea className="w-full whitespace-nowrap">
-      <div className="container h-14 flex items-center gap-2 px-4">
+      <div className="h-14 flex items-center gap-2">
         <Button
           variant={selectedCategory === 'all' ? 'secondary' : 'ghost'}
           size="sm"
