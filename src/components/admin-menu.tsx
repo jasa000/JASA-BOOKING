@@ -7,6 +7,8 @@ import { useFirestore } from '@/firebase';
 import { useEffect, useState } from 'react';
 import {
   Menubar,
+  MenubarContent,
+  MenubarItem,
   MenubarMenu,
   MenubarTrigger,
 } from '@/components/ui/menubar';
@@ -47,35 +49,35 @@ export function AdminMenu() {
         <div className="container flex h-12 min-w-[370px] items-center px-4 md:px-6">
             <Menubar className="border-none rounded-none p-0 h-auto">
               <MenubarMenu>
-                <Link href="/" legacyBehavior passHref>
+                <Link href="/" passHref>
                   <MenubarTrigger className="cursor-pointer">
                     Dashboard
                   </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
-                <Link href="/admin" legacyBehavior passHref>
+                <Link href="/admin" passHref>
                     <MenubarTrigger className="cursor-pointer">
                         Pending Events
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
-                <Link href="/admin/users" legacyBehavior passHref>
+                <Link href="/admin/users" passHref>
                     <MenubarTrigger className="cursor-pointer">
                         Manage Users
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
-                <Link href="/admin/categories" legacyBehavior passHref>
+                <Link href="/admin/categories" passHref>
                     <MenubarTrigger className="cursor-pointer">
                         Categories
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
-                <Link href="/admin/institution" legacyBehavior passHref>
+                <Link href="/admin/institution" passHref>
                     <MenubarTrigger className="cursor-pointer">
                         INSTITUTION
                     </MenubarTrigger>
