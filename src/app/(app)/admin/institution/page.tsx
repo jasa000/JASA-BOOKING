@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import {
@@ -15,6 +15,7 @@ import {
   orderBy,
   updateDoc,
 } from 'firebase/firestore';
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,15 +37,18 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useCollection } from '@/firebase';
-import { Pencil, Trash2, X, Star, UploadCloud, School } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,27 +60,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import type { Institution } from '@/lib/types';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import Image from 'next/image';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { useFirestore, useCollection } from '@/firebase';
+import { Pencil, Trash2, X, Star, UploadCloud, School } from 'lucide-react';
+import type { Institution } from '@/lib/types';
 import { uploadImage } from '@/lib/cloudinary';
 import { cn } from '@/lib/utils';
-
-// Sample data for states and districts
-const locationData: { [key: string]: string[] } = {
-  "State A": ["District A1", "District A2"],
-  "State B": ["District B1", "District B2"],
-  "State C": ["District C1", "District C2"],
-};
-const states = Object.keys(locationData);
+import { indianStatesAndDistricts } from '@/lib/location-data';
 
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -113,14 +105,10 @@ export default function InstitutionsPage() {
       mainImageUrl: '',
     },
   });
-
-  const { fields, append, remove, replace } = useFieldArray({
-    control: form.control,
-    name: 'imageUrls',
-  });
-
+  
   const selectedState = form.watch('state');
-  const districts = selectedState ? locationData[selectedState] : [];
+  const states = Object.keys(indianStatesAndDistricts);
+  const districts = selectedState ? indianStatesAndDistricts[selectedState] : [];
 
   const institutionsCollectionRef = React.useMemo(() => {
     if (!firestore) return null;
@@ -170,9 +158,12 @@ export default function InstitutionsPage() {
   
   const handleUploadImages = async () => {
     if (imageFiles.length === 0) {
+      // If no new files, just return the existing URLs
       return form.getValues('imageUrls') || [];
     }
     setIsUploading(true);
+    toast({ title: 'Uploading Images', description: `Uploading ${imageFiles.length} new image(s)...` });
+    
     const uploadedUrls = await Promise.all(
       imageFiles.map(file => uploadImage(file).catch(e => {
         console.error("Upload failed for a file", e);
@@ -183,34 +174,32 @@ export default function InstitutionsPage() {
     setIsUploading(false);
     
     const successfulUrls = uploadedUrls.filter((url): url is string => url !== null);
-    // Combine existing URLs (if editing) with newly uploaded ones
     const existingUrls = form.getValues('imageUrls');
-    return [...existingUrls, ...successfulUrls];
+    const allUrls = [...existingUrls, ...successfulUrls];
+    
+    form.setValue('imageUrls', allUrls, { shouldValidate: true });
+    
+    // Clear staged files after upload
+    setImageFiles([]);
+
+    return allUrls;
   };
 
   const removeImage = (index: number) => {
-    const newImageFiles = [...imageFiles];
-    const newImagePreviews = [...imagePreviews];
-    const newImageUrls = [...form.getValues('imageUrls')];
-    
-    const removedPreview = imagePreviews[index];
+    const currentUrls = form.getValues('imageUrls');
+    const currentMainUrl = form.getValues('mainImageUrl');
+    const removedUrl = currentUrls[index];
 
-    newImagePreviews.splice(index, 1);
+    const newImageUrls = currentUrls.filter((_, i) => i !== index);
     
-    // Check if the removed image was from the initial imageUrls or a new file
-    if (index < newImageUrls.length) {
-       newImageUrls.splice(index, 1);
-    } else {
-       newImageFiles.splice(index - newImageUrls.length, 1);
-    }
-    
-    setImagePreviews(newImagePreviews);
-    setImageFiles(newImageFiles);
-    replace(newImageUrls.concat(newImageFiles.map(f => URL.createObjectURL(f)))); // a bit of a hack to update field array state
-    
+    form.setValue('imageUrls', newImageUrls, { shouldValidate: true });
+    setImagePreviews(newImageUrls); // Also update the visual preview
+
     // If the removed image was the main image, reset it
-    if (form.getValues('mainImageUrl') === removedPreview) {
-      form.setValue('mainImageUrl', newImagePreviews[0] || '');
+    if (currentMainUrl === removedUrl) {
+      // Set the new main image to the first one in the list, or empty if none left
+      const newMainUrl = newImageUrls.length > 0 ? newImageUrls[0] : '';
+      form.setValue('mainImageUrl', newMainUrl, { shouldValidate: true });
     }
   };
 
@@ -282,6 +271,9 @@ export default function InstitutionsPage() {
   const handleCancelEdit = () => {
     setEditingInstitution(null);
   }
+  
+  const currentImageUrls = form.watch('imageUrls');
+  const watchedMainImageUrl = form.watch('mainImageUrl');
 
   return (
     <div className="container mx-auto px-4 py-8 grid gap-8 lg:grid-cols-3">
@@ -297,7 +289,6 @@ export default function InstitutionsPage() {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 
-                {/* Image Upload and Management */}
                 <FormItem>
                   <FormLabel>Institution Images</FormLabel>
                    <FormControl>
@@ -317,17 +308,26 @@ export default function InstitutionsPage() {
                     </div>
                   </FormControl>
                   <FormMessage>{form.formState.errors.imageUrls?.message}</FormMessage>
+
                   <div className="grid grid-cols-3 gap-2 mt-4">
-                    {imagePreviews.map((previewUrl, index) => (
-                      <div key={previewUrl} className="relative group aspect-square">
-                        <Image src={previewUrl} alt={`Preview ${index}`} fill className="object-cover rounded-md" />
+                    {currentImageUrls?.map((url, index) => (
+                      <div key={url} className="relative group aspect-square">
+                        <Image src={url} alt={`Preview ${index}`} fill className="object-cover rounded-md" />
                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 rounded-md">
-                          <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-white" onClick={() => setAsMainImage(previewUrl)}>
-                              <Star className={cn("h-4 w-4", form.watch('mainImageUrl') === previewUrl && "fill-yellow-400 text-yellow-400")} />
+                          <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-white" onClick={() => setAsMainImage(url)}>
+                              <Star className={cn("h-4 w-4", watchedMainImageUrl === url && "fill-yellow-400 text-yellow-400")} />
                           </Button>
                           <Button type='button' variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeImage(index)}>
                               <X className="h-4 w-4" />
                           </Button>
+                        </div>
+                      </div>
+                    ))}
+                     {imagePreviews.filter(p => !currentImageUrls.includes(p)).map((previewUrl, index) => (
+                      <div key={previewUrl} className="relative group aspect-square opacity-50">
+                        <Image src={previewUrl} alt={`Uploading Preview ${index}`} fill className="object-cover rounded-md" />
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                           <Loader2 className="h-5 w-5 text-white animate-spin" />
                         </div>
                       </div>
                     ))}
@@ -464,6 +464,3 @@ export default function InstitutionsPage() {
     </div>
   );
 }
-
-
-    
