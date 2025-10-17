@@ -61,6 +61,9 @@ const categoryFormSchema = z.object({
   name: z.string().min(2, {
     message: 'Category name must be at least 2 characters.',
   }),
+  order: z.coerce.number().min(0, {
+    message: 'Order must be a positive number.',
+  }),
 });
 
 export default function CategoriesPage() {
@@ -75,7 +78,7 @@ export default function CategoriesPage() {
 
   const categoriesQuery = React.useMemo(() => {
     if (!categoriesCollectionRef) return null;
-    return query(categoriesCollectionRef, orderBy('name', 'asc'));
+    return query(categoriesCollectionRef, orderBy('order', 'asc'));
   }, [categoriesCollectionRef]);
 
   const {
@@ -88,6 +91,7 @@ export default function CategoriesPage() {
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       name: '',
+      order: 0,
     },
   });
 
@@ -104,7 +108,7 @@ export default function CategoriesPage() {
         title: 'Category Created',
         description: `The category "${values.name}" has been added.`,
       });
-      form.reset();
+      form.reset({ name: '', order: (categories?.length || 0) + 1 });
     } catch (e: any) {
       toast({
         variant: 'destructive',
@@ -115,6 +119,12 @@ export default function CategoriesPage() {
       setIsSubmitting(false);
     }
   }
+
+  React.useEffect(() => {
+    if (categories) {
+      form.reset({ name: '', order: categories.length });
+    }
+  }, [categories, form]);
 
   const handleDelete = async (categoryId: string) => {
     if (!firestore) return;
@@ -141,7 +151,7 @@ export default function CategoriesPage() {
           <CardHeader>
             <CardTitle>Add New Category</CardTitle>
             <CardDescription>
-              Create a new category for events.
+              Create a new category for events. The order determines the display sequence on the homepage.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -155,6 +165,19 @@ export default function CategoriesPage() {
                       <FormLabel>Category Name</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g. Technology" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="order"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Display Order</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g. 1" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -182,6 +205,7 @@ export default function CategoriesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[80px]">Order</TableHead>
                     <TableHead>Category Name</TableHead>
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
@@ -190,6 +214,7 @@ export default function CategoriesPage() {
                   {loading ? (
                     [...Array(3)].map((_, i) => (
                       <TableRow key={i}>
+                        <TableCell><Skeleton className="h-4 w-8" /></TableCell>
                         <TableCell>
                           <Skeleton className="h-4 w-32" />
                         </TableCell>
@@ -201,7 +226,7 @@ export default function CategoriesPage() {
                   ) : error ? (
                     <TableRow>
                       <TableCell
-                        colSpan={2}
+                        colSpan={3}
                         className="h-24 text-center text-destructive"
                       >
                         Error loading categories: {error.message}
@@ -210,6 +235,7 @@ export default function CategoriesPage() {
                   ) : categories && categories.length > 0 ? (
                     categories.map((category) => (
                       <TableRow key={category.id}>
+                        <TableCell className="font-mono">{category.order}</TableCell>
                         <TableCell className="font-medium">
                           {category.name}
                         </TableCell>
@@ -246,7 +272,7 @@ export default function CategoriesPage() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={2} className="h-24 text-center">
+                      <TableCell colSpan={3} className="h-24 text-center">
                         No categories found.
                       </TableCell>
                     </TableRow>
