@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WelcomeBanner } from '@/components/welcome-banner';
 import { CategoryFilter } from '@/components/category-filter';
+import { InstitutionFilter } from '@/components/institution-filter';
 
 export default function EventsPage() {
   const firestore = useFirestore();
@@ -55,8 +56,11 @@ export default function EventsPage() {
     <div className="container mx-auto px-4 py-8">
       <WelcomeBanner />
       
-      <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm -mx-4 px-4 border-b">
-         <CategoryFilter selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+      <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm -mx-4 border-b">
+         <div className='container'>
+            <CategoryFilter selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+         </div>
+         <InstitutionFilter />
       </div>
       
       <div className="mt-8">

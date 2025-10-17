@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -78,13 +79,14 @@
         "location": { "type": "string" },
         "date": { "type": "string", "format": "date-time" },
         "category": { "type": "string" },
+        "institution": { "type": "string" },
         "imageUrl": { "type": "string", "format": "uri" },
         "organizer": { "type": "string" },
         "organizerId": { "type": "string" },
         "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["title", "description", "location", "date", "category", "imageUrl", "organizerId", "status"]
+      "required": ["title", "description", "location", "date", "category", "institution", "imageUrl", "organizerId", "status"]
     },
     "Institution": {
       "title": "Institution",

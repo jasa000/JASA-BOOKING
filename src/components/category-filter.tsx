@@ -38,44 +38,47 @@ export function CategoryFilter({
 
   if (error) {
     return (
-      <div className="container h-14 flex items-center justify-center">
+      <div className="h-14 flex items-center justify-center">
           <p className="text-sm text-destructive">Error loading categories.</p>
       </div>
     );
   }
 
   return (
-    <ScrollArea className="w-full whitespace-nowrap">
-      <div className="h-14 flex items-center gap-2">
-        <Button
-          variant={selectedCategory === 'all' ? 'secondary' : 'ghost'}
-          size="sm"
-          onClick={() => onSelectCategory('all')}
-          className="rounded-full shrink-0"
-        >
-          All
-        </Button>
-        {loading ? (
-            [...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-8 w-24 rounded-full" />
-          ))
-        ) : (
-          categories?.map((category) => (
+    <div>
+        <h3 className="text-lg font-semibold mb-2 font-headline">Browse by Category</h3>
+        <ScrollArea className="w-full whitespace-nowrap">
+        <div className="h-14 flex items-center gap-2">
             <Button
-              key={category.id}
-              variant={
-                selectedCategory === category.name ? 'secondary' : 'ghost'
-              }
-              size="sm"
-              onClick={() => onSelectCategory(category.name)}
-              className="rounded-full shrink-0"
+            variant={selectedCategory === 'all' ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => onSelectCategory('all')}
+            className="rounded-full shrink-0"
             >
-              {category.name}
+            All
             </Button>
-          ))
-        )}
-      </div>
-      <ScrollBar orientation="horizontal" className="invisible" />
-    </ScrollArea>
+            {loading ? (
+                [...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-8 w-24 rounded-full" />
+            ))
+            ) : (
+            categories?.map((category) => (
+                <Button
+                key={category.id}
+                variant={
+                    selectedCategory === category.name ? 'secondary' : 'ghost'
+                }
+                size="sm"
+                onClick={() => onSelectCategory(category.name)}
+                className="rounded-full shrink-0"
+                >
+                {category.name}
+                </Button>
+            ))
+            )}
+        </div>
+        <ScrollBar orientation="horizontal" className="invisible" />
+        </ScrollArea>
+    </div>
   );
 }

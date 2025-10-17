@@ -26,6 +26,7 @@ export type Event = {
   imageHint: string;
   status: 'pending' | 'approved' | 'rejected';
   category: string;
+  institution: string;
 };
 
 export type Category = {

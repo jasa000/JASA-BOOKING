@@ -1,3 +1,4 @@
+
 import type { User, Event } from '@/lib/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
@@ -17,7 +18,8 @@ export const events: Event[] = [
     imageUrl: PlaceHolderImages[0].imageUrl,
     imageHint: PlaceHolderImages[0].imageHint,
     status: 'approved',
-    category: 'Technology'
+    category: 'Technology',
+    institution: 'Example University',
   },
   {
     id: '2',
@@ -29,7 +31,8 @@ export const events: Event[] = [
     imageUrl: PlaceHolderImages[1].imageUrl,
     imageHint: PlaceHolderImages[1].imageHint,
     status: 'approved',
-    category: 'Music'
+    category: 'Music',
+    institution: 'Community College',
   },
   {
     id: '3',
@@ -41,7 +44,8 @@ export const events: Event[] = [
     imageUrl: PlaceHolderImages[2].imageUrl,
     imageHint: PlaceHolderImages[2].imageHint,
     status: 'approved',
-    category: 'Workshop'
+    category: 'Workshop',
+    institution: 'Example University',
   },
   {
     id: '4',
@@ -53,7 +57,8 @@ export const events: Event[] = [
     imageUrl: PlaceHolderImages[3].imageUrl,
     imageHint: PlaceHolderImages[3].imageHint,
     status: 'pending',
-    category: 'Business'
+    category: 'Business',
+    institution: 'Example University',
   },
   {
     id: '5',
@@ -65,7 +70,8 @@ export const events: Event[] = [
     imageUrl: PlaceHolderImages[4].imageUrl,
     imageHint: PlaceHolderImages[4].imageHint,
     status: 'approved',
-    category: 'Community'
+    category: 'Community',
+    institution: 'Community College',
   },
   {
     id: '6',
@@ -77,7 +83,8 @@ export const events: Event[] = [
     imageUrl: PlaceHolderImages[5].imageUrl,
     imageHint: PlaceHolderImages[5].imageHint,
     status: 'approved',
-    category: 'Arts'
+    category: 'Arts',
+    institution: 'Example University',
   },
   {
     id: '7',
@@ -89,7 +96,8 @@ export const events: Event[] = [
     imageUrl: PlaceHolderImages[6].imageUrl,
     imageHint: PlaceHolderImages[6].imageHint,
     status: 'pending',
-    category: 'Business'
+    category: 'Business',
+    institution: 'Community College',
   },
   {
     id: '8',
@@ -101,6 +109,7 @@ export const events: Event[] = [
     imageUrl: PlaceHolderImages[7].imageUrl,
     imageHint: PlaceHolderImages[7].imageHint,
     status: 'approved',
-    category: 'Wellness'
+    category: 'Wellness',
+    institution: 'Example University',
   },
 ];

@@ -39,7 +39,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { uploadImage } from "@/lib/cloudinary"
 import { useUser, useFirestore, useCollection } from "@/firebase"
 import { collection, addDoc, serverTimestamp, query, orderBy } from "firebase/firestore"
-import type { Category } from "@/lib/types"
+import type { Category, Institution } from "@/lib/types"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -60,6 +60,9 @@ const formSchema = z.object({
   }),
   category: z.string({
     required_error: "Please select a category.",
+  }),
+  institution: z.string({
+    required_error: "Please select an institution.",
   }),
   image: z
     .instanceof(File)
@@ -83,10 +86,23 @@ export default function CreateEventPage() {
 
   const categoriesQuery = React.useMemo(() => {
     if(!categoriesCollectionRef) return null;
-    return query(categoriesCollectionRef, orderBy('name', 'asc'));
+    return query(categoriesCollectionRef, orderBy('order', 'asc'));
   }, [categoriesCollectionRef]);
 
   const { data: categories, loading: categoriesLoading } = useCollection<Category>(categoriesQuery);
+
+  const institutionsCollectionRef = React.useMemo(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'institutions');
+  }, [firestore]);
+
+  const institutionsQuery = React.useMemo(() => {
+    if(!institutionsCollectionRef) return null;
+    return query(institutionsCollectionRef, orderBy('name', 'asc'));
+  }, [institutionsCollectionRef]);
+
+  const { data: institutions, loading: institutionsLoading } = useCollection<Institution>(institutionsQuery);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -257,7 +273,8 @@ export default function CreateEventPage() {
                   )}
                 />
               </div>
-               <FormField
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <FormField
                   control={form.control}
                   name="category"
                   render={({ field }) => (
@@ -279,6 +296,29 @@ export default function CreateEventPage() {
                     </FormItem>
                   )}
                 />
+                 <FormField
+                  control={form.control}
+                  name="institution"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Institution</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={institutionsLoading ? "Loading..." : "Select an institution"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {!institutionsLoading && institutions?.map(institution => (
+                            <SelectItem key={institution.id} value={institution.name}>{institution.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <Button type="submit" className="bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:opacity-90 transition-opacity" disabled={isSubmitting}>
                 {isSubmitting ? "Submitting..." : "Submit for Approval"}
