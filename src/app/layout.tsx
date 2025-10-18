@@ -8,22 +8,24 @@ import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import React, { useEffect } from 'react';
 
-// This component now wraps the body and applies the theme class
+// This new AppBody component is the key. It's a client component that
+// can use the useTheme hook and reliably apply classes to the document body.
 function AppBody({ children }: { children: React.ReactNode }) {
   const { colorTheme, previewColorTheme } = useTheme();
 
   useEffect(() => {
     const body = document.body;
-    // Clean up all old theme classes
+    const activeTheme = previewColorTheme || colorTheme;
+
+    // Clean up any existing theme classes
     body.classList.forEach(className => {
       if (className.startsWith('theme-')) {
         body.classList.remove(className);
       }
     });
 
-    // Add the new theme class
-    const activeTheme = previewColorTheme || colorTheme;
-    if (activeTheme) {
+    // Add the new theme class if it's not the default
+    if (activeTheme && activeTheme !== 'zinc') {
       body.classList.add(`theme-${activeTheme}`);
     }
   }, [colorTheme, previewColorTheme]);

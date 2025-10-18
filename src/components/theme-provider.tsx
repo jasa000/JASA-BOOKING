@@ -99,9 +99,9 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
         theme: (theme as Theme) || 'system',
         setTheme,
         colorTheme,
-        setColorTheme,
+        setColorTheme, // This now passes the REAL function
         defaultTheme,
-        setDefaultTheme,
+        setDefaultTheme, // This now passes the REAL function
         settingsLoading,
         previewColorTheme,
         setPreviewColorTheme,

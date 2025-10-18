@@ -33,11 +33,19 @@ export default function AppearancePage() {
 
     const { toast } = useToast();
 
+    // Effect to correctly initialize local state when global state loads from DB
     useEffect(() => {
         if (!settingsLoading) {
             setSelectedDefaultTheme(defaultTheme);
         }
     }, [defaultTheme, settingsLoading]);
+    
+    // Effect to clean up preview on component unmount/navigation
+    useEffect(() => {
+        return () => {
+            setPreviewColorTheme(null);
+        };
+    }, [setPreviewColorTheme]);
 
     const handleSelectColorTheme = (theme: ColorTheme) => {
         setPreviewColorTheme(theme);
@@ -46,12 +54,12 @@ export default function AppearancePage() {
     const handleSaveColor = () => {
         if (previewColorTheme) {
             setColorTheme(previewColorTheme);
+            setPreviewColorTheme(null); // Clear preview on save
+            toast({
+                title: "Color Theme Saved",
+                description: "Your new color theme has been applied application-wide.",
+            });
         }
-        setPreviewColorTheme(null); // Clear preview on save
-        toast({
-            title: "Color Theme Saved",
-            description: "Your new color theme has been applied application-wide.",
-        });
     };
 
     const handleSaveDefaultTheme = () => {
@@ -71,13 +79,6 @@ export default function AppearancePage() {
     const handleCancelDefaultTheme = () => {
         setSelectedDefaultTheme(defaultTheme);
     }
-
-    // Clear preview if user navigates away
-    useEffect(() => {
-        return () => {
-            setPreviewColorTheme(null);
-        };
-    }, [setPreviewColorTheme]);
 
     const hasColorChanges = previewColorTheme !== null && previewColorTheme !== colorTheme;
     const hasThemeChanges = selectedDefaultTheme !== defaultTheme;
