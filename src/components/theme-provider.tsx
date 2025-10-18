@@ -68,19 +68,18 @@ export function ThemeProvider({
 
     // remove previous color theme classes
     const themes: ColorTheme[] = ["zinc", "red", "blue", "green", "rose"];
+    const body = window.document.body;
+    const previewTheme = body.dataset.previewTheme as ColorTheme | undefined;
+
     themes.forEach(t => root.classList.remove(`theme-${t}`));
 
     // Only apply color theme if in light mode
     if (effectiveTheme === 'light') {
-      if (colorTheme !== "zinc") {
-        root.classList.add(`theme-${colorTheme}`);
-      } else {
-        // When zinc is selected, we don't add any specific theme class,
-        // so it falls back to the default :root variables in globals.css
-      }
+        const themeToApply = previewTheme || colorTheme;
+        if (themeToApply !== "zinc") {
+            root.classList.add(`theme-${themeToApply}`);
+        }
     }
-
-
   }, [theme, colorTheme])
 
   const value = {

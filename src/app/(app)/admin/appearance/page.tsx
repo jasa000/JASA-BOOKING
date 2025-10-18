@@ -25,6 +25,28 @@ export default function AppearancePage() {
     useEffect(() => {
         setSelectedColorTheme(colorTheme);
     }, [colorTheme]);
+    
+    // Effect to handle previewing themes
+    useEffect(() => {
+        const body = document.body;
+        if (selectedColorTheme !== colorTheme) {
+            body.dataset.previewTheme = selectedColorTheme;
+        } else {
+            delete body.dataset.previewTheme;
+        }
+
+        // Force a re-evaluation of styles in the theme provider
+        // This is a bit of a hack, but it works to trigger the effect
+        const root = document.documentElement;
+        root.style.setProperty("--dummy-var", Math.random().toString());
+
+
+        return () => {
+            delete body.dataset.previewTheme;
+            root.style.removeProperty("--dummy-var");
+        };
+    }, [selectedColorTheme, colorTheme]);
+
 
     const handleSave = () => {
         setColorTheme(selectedColorTheme);
