@@ -46,7 +46,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Camera, Trash2, LogOut } from "lucide-react";
+import { Camera, Trash2 } from "lucide-react";
 import { ImageCropper } from "@/components/image-cropper";
 import { uploadImage } from "@/lib/cloudinary";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -339,15 +339,6 @@ export default function ProfilePage() {
       setIsDeleting(false);
     }
   };
-  
-    const handleSignOut = () => {
-    if (auth) {
-      signOut(auth).then(() => {
-        router.push('/');
-      });
-    }
-  };
-
 
   const loading = userLoading || profileLoading;
 
@@ -384,30 +375,6 @@ export default function ProfilePage() {
         }}
       />
       <div className="max-w-3xl mx-auto space-y-8">
-        <div className="flex justify-end">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline">
-                <LogOut className="mr-2 h-4 w-4" />
-                Log out
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  You will be returned to the homepage.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleSignOut}>
-                  Log out
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
         <Card>
           <CardHeader className="items-center">
               <div className="relative group">
@@ -650,3 +617,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
