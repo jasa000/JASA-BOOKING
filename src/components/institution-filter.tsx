@@ -6,7 +6,6 @@ import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import type { Institution } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from './ui/card';
@@ -41,13 +40,12 @@ export function InstitutionFilter() {
 
   return (
     <div className="py-8">
-      <h2 className="text-3xl font-bold font-headline mb-6 text-center">Browse by Institution</h2>
       <div className="container">
-        <ScrollArea className="w-full">
-          <div className="flex gap-6 pb-4">
+        <h2 className="text-3xl font-bold font-headline mb-6 text-center">Browse by Institution</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading
-              ? [...Array(4)].map((_, i) => (
-                  <div key={i} className="flex flex-col space-y-3 w-72">
+              ? [...Array(3)].map((_, i) => (
+                  <div key={i} className="flex flex-col space-y-3">
                     <Skeleton className="h-40 w-full rounded-lg" />
                     <Skeleton className="h-5 w-3/4" />
                     <Skeleton className="h-4 w-1/2" />
@@ -58,7 +56,6 @@ export function InstitutionFilter() {
                     key={institution.id}
                     href={`/institution/${encodeURIComponent(institution.name)}`}
                     passHref
-                    className="w-72 shrink-0"
                   >
                     <Card className="overflow-hidden transition-transform duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col">
                       <div className="relative h-40 w-full bg-muted">
@@ -84,8 +81,6 @@ export function InstitutionFilter() {
                   </Link>
                 ))}
           </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
       </div>
     </div>
   );
