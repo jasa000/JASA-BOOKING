@@ -104,38 +104,43 @@ export default function EventsPage() {
       </div>
 
       {userLoading ? (
-        <div className="container py-8">
-          <Skeleton className="h-8 w-1/2 mb-6" />
-          <div className="flex gap-6">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex flex-col space-y-3 w-72">
-                <Skeleton className="h-40 w-full rounded-lg" />
-                <Skeleton className="h-5 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            ))}
-          </div>
+        <div className="py-8">
+            <div className="container">
+                <Skeleton className="h-8 w-1/2 mb-6 mx-auto" />
+                <div className="flex gap-6 justify-center">
+                    {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex flex-col space-y-3 w-72">
+                        <Skeleton className="h-40 w-full rounded-lg" />
+                        <Skeleton className="h-5 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                    </div>
+                    ))}
+                </div>
+            </div>
         </div>
       ) : user ? (
         <InstitutionFilter />
       ) : (
-        <div className="container py-8 text-center">
-            <Card className="max-w-2xl mx-auto">
-                <CardContent className="p-6 md:p-8">
-                    <h2 className="text-xl md:text-2xl font-bold font-headline mb-4">View Events by Institution</h2>
-                    <p className="text-muted-foreground mb-6">
-                        Log in or create an account to browse events hosted by specific colleges and institutions.
-                    </p>
-                    <div className="flex justify-center gap-4">
-                        <Button asChild>
-                            <Link href="/login">Log In</Link>
-                        </Button>
-                        <Button variant="secondary" asChild>
-                            <Link href="/register">Sign Up</Link>
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
+        <div className="py-8">
+            <h2 className="text-3xl font-bold font-headline mb-6 text-center">Browse by Institution</h2>
+            <div className="container">
+                <Card className="max-w-2xl mx-auto">
+                    <CardContent className="p-6 md:p-8 text-center">
+                        <h2 className="text-xl md:text-2xl font-bold font-headline mb-4">View Events by Institution</h2>
+                        <p className="text-muted-foreground mb-6">
+                            Log in or create an account to browse events hosted by specific colleges and institutions.
+                        </p>
+                        <div className="flex justify-center gap-4">
+                            <Button asChild>
+                                <Link href="/login">Log In</Link>
+                            </Button>
+                            <Button variant="secondary" asChild>
+                                <Link href="/register">Sign Up</Link>
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
       )}
     </>
