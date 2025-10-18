@@ -121,25 +121,12 @@ export default function EventsPage() {
       ) : user ? (
         <InstitutionFilter />
       ) : (
-        <div className="py-8">
+        <div className="py-8 text-center">
             <h2 className="text-3xl font-bold font-headline mb-6 text-center">Browse by Institution</h2>
             <div className="container">
-                <Card className="max-w-2xl mx-auto">
-                    <CardContent className="p-6 md:p-8 text-center">
-                        <h2 className="text-xl md:text-2xl font-bold font-headline mb-4">View Events by Institution</h2>
-                        <p className="text-muted-foreground mb-6">
-                            Log in or create an account to browse events hosted by specific colleges and institutions.
-                        </p>
-                        <div className="flex justify-center gap-4">
-                            <Button asChild>
-                                <Link href="/login">Log In</Link>
-                            </Button>
-                            <Button variant="secondary" asChild>
-                                <Link href="/register">Sign Up</Link>
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                <p className="text-muted-foreground">
+                    This section is only accessible when a user is logged in.
+                </p>
             </div>
         </div>
       )}
