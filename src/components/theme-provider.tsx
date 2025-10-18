@@ -28,7 +28,7 @@ type CustomThemeContextType = {
 const initialThemeState: CustomThemeContextType = {
   theme: "system",
   setTheme: () => null,
-  colorTheme: "red",
+  colorTheme: "zinc",
   setColorTheme: () => null,
   defaultTheme: "system",
   setDefaultTheme: () => null,
@@ -48,7 +48,7 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
 
     const { data: appSettings, loading: settingsLoading } = useDoc<AppSettings>(settingsDocRef);
     
-    const colorTheme = appSettings?.colorTheme || "red";
+    const colorTheme = appSettings?.colorTheme || "zinc";
     const defaultTheme = appSettings?.defaultTheme || "system";
 
     const setColorTheme = useCallback((newColorTheme: ColorTheme) => {

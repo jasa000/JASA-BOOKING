@@ -5,15 +5,15 @@ import './globals.css';
 import { ThemeProvider, useTheme } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-import React from 'react';
+import React, { useEffect } from 'react';
 
-// This AppBody component is the key. It's a client component that
-// can use the useTheme hook and reliably apply classes to the document body.
+
 function AppBody({ children }: { children: React.ReactNode }) {
   const { colorTheme, settingsLoading } = useTheme();
 
-  // This logic now runs on every render on the client, ensuring the class is always correct.
-  if (typeof window !== 'undefined' && !settingsLoading) {
+  useEffect(() => {
+    if (settingsLoading) return; // Wait until settings are loaded
+
     const body = document.body;
     
     // Create a new class list by filtering out any existing theme classes.
@@ -21,16 +21,14 @@ function AppBody({ children }: { children: React.ReactNode }) {
       (cls) => !cls.startsWith('theme-')
     );
 
-    // If there is a color theme from the DB, apply its class.
-    // The default theme (red) doesn't need a class, as its styles are in the :root.
-    if (colorTheme && colorTheme !== 'red') {
+    // Always add the class for the currently loaded theme.
+    if (colorTheme) {
       newClassList.push(`theme-${colorTheme}`);
     }
-
-    // Set the className property directly. This is an atomic operation and more
-    // reliable than adding/removing individual classes in a loop.
+    
     body.className = newClassList.join(' ');
-  }
+
+  }, [colorTheme, settingsLoading]);
 
 
   return <>{children}</>;

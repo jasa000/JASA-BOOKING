@@ -13,8 +13,8 @@ interface ThemeSelectorProps {
 export function ThemeSelector({ selectedTheme, onSelectTheme }: ThemeSelectorProps) {
 
   const themes: { name: ColorTheme; label: string; color: string }[] = [
+    { name: "zinc", label: "Zinc", color: "#18181B" },
     { name: "red", label: "Red", color: "#DC2626" },
-    { name: "zinc", label: "Zinc", color: "#71717A" },
     { name: "royal-blue", label: "Royal Blue", color: "#3B82F6" },
     { name: "light-blue", label: "Light Blue", color: "#60A5FA" },
     { name: "royal-green", label: "Royal Green", color: "#16A34A" },
@@ -30,7 +30,7 @@ export function ThemeSelector({ selectedTheme, onSelectTheme }: ThemeSelectorPro
               "flex w-full items-center justify-center rounded-md border-2 p-1",
               selectedTheme === theme.name ? "border-primary" : "border-transparent"
             )}
-            style={{ backgroundColor: theme.name === 'zinc' && selectedTheme !== 'zinc' ? 'hsl(var(--muted))' : ''}}
+            style={{ backgroundColor: theme.name === 'zinc' ? 'hsl(var(--muted))' : ''}}
           >
             <div className="flex w-full items-center justify-center space-x-2 rounded-md p-2">
               <div
