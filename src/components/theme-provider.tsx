@@ -32,7 +32,7 @@ const ThemeProviderContext = React.createContext<ThemeProviderState>(initialStat
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
+  defaultTheme = "light",
   defaultColorTheme = "red",
   storageKey = "ui-theme",
   colorStorageKey = "ui-color-theme",
@@ -59,23 +59,26 @@ export function ThemeProvider({
     
     root.classList.remove("light", "dark");
     
+    let effectiveTheme = theme;
     if (theme === "system") {
-        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-        root.classList.add(systemTheme)
-    } else {
-        root.classList.add(theme)
+        effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
     }
+    root.classList.add(effectiveTheme);
+
 
     // remove previous color theme classes
     const themes: ColorTheme[] = ["zinc", "red", "blue", "green", "rose"];
     themes.forEach(t => root.classList.remove(`theme-${t}`));
 
-    if (colorTheme !== "zinc") {
-      root.classList.add(`theme-${colorTheme}`);
-    } else {
-       if (theme !== 'dark') {
-         root.classList.remove('theme-red');
-       }
+    // Only apply color theme if in light mode
+    if (effectiveTheme === 'light') {
+      if (colorTheme !== "zinc") {
+        root.classList.add(`theme-${colorTheme}`);
+      } else {
+         // This else block handles the default 'zinc' theme which has 'red' as default in light mode in your setup.
+         // Let's assume the default is red.
+         root.classList.add('theme-red');
+      }
     }
 
 
