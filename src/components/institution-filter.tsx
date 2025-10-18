@@ -40,51 +40,53 @@ export function InstitutionFilter() {
   }
 
   return (
-    <div className="container py-8">
+    <div className="py-8">
       <h2 className="text-3xl font-bold font-headline mb-6 text-center">Browse by Institution</h2>
-      <ScrollArea className="w-full">
-        <div className="flex gap-6 pb-4">
-          {loading
-            ? [...Array(4)].map((_, i) => (
-                <div key={i} className="flex flex-col space-y-3 w-72">
-                  <Skeleton className="h-40 w-full rounded-lg" />
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              ))
-            : institutions?.filter(inst => inst.mainImageUrl).map((institution) => (
-                <Link
-                  key={institution.id}
-                  href={`/institution/${encodeURIComponent(institution.name)}`}
-                  passHref
-                  className="w-72 shrink-0"
-                >
-                  <Card className="overflow-hidden transition-transform duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col">
-                    <div className="relative h-40 w-full bg-muted">
-                      {institution.mainImageUrl && (
-                        <Image
-                          src={institution.mainImageUrl}
-                          alt={institution.name}
-                          fill
-                          className="object-cover"
-                        />
-                      )}
-                    </div>
-                    <CardContent className="p-4 flex-grow">
-                      <h3 className="font-semibold font-headline text-lg truncate hover:text-primary transition-colors">
-                        {institution.name}
-                      </h3>
-                      <div className="text-sm text-muted-foreground flex items-center mt-2">
-                        <MapPin className="mr-1.5 h-4 w-4 shrink-0" />
-                        <span>{`${institution.district}, ${institution.state}`}</span>
+      <div className="container">
+        <ScrollArea className="w-full">
+          <div className="flex gap-6 pb-4">
+            {loading
+              ? [...Array(4)].map((_, i) => (
+                  <div key={i} className="flex flex-col space-y-3 w-72">
+                    <Skeleton className="h-40 w-full rounded-lg" />
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                ))
+              : institutions?.filter(inst => inst.mainImageUrl).map((institution) => (
+                  <Link
+                    key={institution.id}
+                    href={`/institution/${encodeURIComponent(institution.name)}`}
+                    passHref
+                    className="w-72 shrink-0"
+                  >
+                    <Card className="overflow-hidden transition-transform duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col">
+                      <div className="relative h-40 w-full bg-muted">
+                        {institution.mainImageUrl && (
+                          <Image
+                            src={institution.mainImageUrl}
+                            alt={institution.name}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+                      <CardContent className="p-4 flex-grow">
+                        <h3 className="font-semibold font-headline text-lg truncate hover:text-primary transition-colors">
+                          {institution.name}
+                        </h3>
+                        <div className="text-sm text-muted-foreground flex items-center mt-2">
+                          <MapPin className="mr-1.5 h-4 w-4 shrink-0" />
+                          <span>{`${institution.district}, ${institution.state}`}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
     </div>
   );
 }
