@@ -13,7 +13,9 @@ import React, { useEffect } from 'react';
 function AppBody({ children }: { children: React.ReactNode }) {
   const { colorTheme } = useTheme();
 
-  useEffect(() => {
+  // This logic now runs on every render on the client, ensuring the class is always correct.
+  // We avoid useEffect to prevent race conditions with theme state loading.
+  if (typeof window !== 'undefined') {
     const body = document.body;
     
     // Create a copy of the class list to safely iterate over while modifying it.
@@ -23,14 +25,16 @@ function AppBody({ children }: { children: React.ReactNode }) {
             classesToRemove.push(cls);
         }
     }
-    body.classList.remove(...classesToRemove);
+    
+    if (classesToRemove.length > 0) {
+      body.classList.remove(...classesToRemove);
+    }
 
-    // Add the new theme class.
-    if (colorTheme) {
+    // Add the new theme class, but not for zinc which is the default.
+    if (colorTheme && colorTheme !== 'zinc') {
       body.classList.add(`theme-${colorTheme}`);
     }
-  }, [colorTheme]);
-
+  }
 
   return <>{children}</>;
 }
