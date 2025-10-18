@@ -17,13 +17,12 @@ export function SiteHeader() {
     <header className={cn(
         "sticky top-0 z-40 w-full border-b",
         theme === 'light' 
-            ? "bg-primary text-primary-foreground animate-shine [--shine-color-1:theme(colors.blue.300)] [--shine-color-2:theme(colors.blue.100)]"
+            ? "bg-primary text-primary-foreground"
             : "dark:bg-black"
     )}>
       <div className="container px-4 md:px-6">
         <div className="relative flex h-16 items-center justify-between">
-          
-          <div className="flex items-center">
+          <div className="flex items-center justify-start">
             <Link href="/" className="hidden md:block">
               <Button variant="ghost" size="icon" className="hover:bg-primary/90 dark:hover:bg-gray-700">
                 <Home className="h-5 w-5" />
@@ -43,7 +42,7 @@ export function SiteHeader() {
             <MainNav />
           </div>
           
-          <div className="flex items-center">
+          <div className="flex items-center justify-end">
               <Link href="/events/create">
                   <Button variant="ghost" size="icon" className="hover:bg-primary/90 dark:hover:bg-gray-700">
                       <PlusSquare className="h-5 w-5" />
