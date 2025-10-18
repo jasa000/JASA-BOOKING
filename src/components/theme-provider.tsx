@@ -75,9 +75,8 @@ export function ThemeProvider({
       if (colorTheme !== "zinc") {
         root.classList.add(`theme-${colorTheme}`);
       } else {
-         // This else block handles the default 'zinc' theme which has 'red' as default in light mode in your setup.
-         // Let's assume the default is red.
-         root.classList.add('theme-red');
+        // When zinc is selected, we don't add any specific theme class,
+        // so it falls back to the default :root variables in globals.css
       }
     }
 
