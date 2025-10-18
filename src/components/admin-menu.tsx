@@ -95,13 +95,6 @@ export function AdminMenu() {
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
-              <MenubarMenu>
-                <Link href="/admin/appearance">
-                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
-                        Appearance
-                    </MenubarTrigger>
-                </Link>
-              </MenubarMenu>
             </Menubar>
         </div>
          <ScrollBar orientation="horizontal" className="invisible" />

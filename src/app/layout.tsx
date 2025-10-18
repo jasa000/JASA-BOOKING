@@ -2,37 +2,10 @@
 'use client';
 
 import './globals.css';
-import { ThemeProvider, useTheme } from '@/components/theme-provider';
+import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-import React, { useEffect } from 'react';
-
-
-function AppBody({ children }: { children: React.ReactNode }) {
-  const { colorTheme, settingsLoading } = useTheme();
-
-  // This logic now runs on every render to ensure the class is always correct.
-  if (typeof window !== 'undefined' && !settingsLoading) {
-    const body = document.body;
-    
-    // Create a new class list by filtering out any existing theme classes.
-    const newClassList = Array.from(body.classList).filter(
-      (cls) => !cls.startsWith('theme-')
-    );
-
-    // Always add the class for the currently loaded theme.
-    // If the theme is the default "zinc", no class is needed.
-    if (colorTheme && colorTheme !== 'zinc') {
-      newClassList.push(`theme-${colorTheme}`);
-    }
-    
-    body.className = newClassList.join(' ');
-  }
-
-
-  return <>{children}</>;
-}
-
+import React from 'react';
 
 export default function RootLayout({
   children,
@@ -53,10 +26,8 @@ export default function RootLayout({
       <body className="font-body antialiased min-h-screen bg-background">
         <FirebaseClientProvider>
           <ThemeProvider>
-            <AppBody>
-              {children}
-              <Toaster />
-            </AppBody>
+            {children}
+            <Toaster />
           </ThemeProvider>
         </FirebaseClientProvider>
       </body>

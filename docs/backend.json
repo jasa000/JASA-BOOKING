@@ -121,23 +121,6 @@
         }
       },
       "required": ["name", "state", "district", "address", "imageUrls", "mainImageUrl"]
-    },
-    "AppSettings": {
-      "title": "Application Settings",
-      "description": "Stores global settings for the application.",
-      "type": "object",
-      "properties": {
-        "colorTheme": {
-          "type": "string",
-          "description": "The active color theme for the application.",
-          "enum": ["zinc", "red", "royal-blue", "light-blue", "royal-green"]
-        },
-        "defaultTheme": {
-            "type": "string",
-            "description": "The default appearance theme (light/dark/system) for new users.",
-            "enum": ["light", "dark", "system"]
-        }
-      }
     }
   },
   "auth": {
@@ -159,10 +142,6 @@
     "/institutions/{institutionId}": {
       "schema": { "$ref": "#/entities/Institution" },
       "description": "Stores the list of institutions."
-    },
-    "/settings/app-config": {
-      "schema": { "$ref": "#/entities/AppSettings" },
-      "description": "Stores global application settings like the current theme."
     }
   }
 }
