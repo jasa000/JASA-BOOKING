@@ -13,7 +13,7 @@ export function MainNav({
 
   return (
     <nav
-      className={cn("flex items-center", className)}
+      className={cn("flex items-center justify-center", className)}
       {...props}
     >
       <Link href="/" className="flex flex-col items-center space-y-0">
@@ -23,7 +23,7 @@ export function MainNav({
         >
           JASA
         </span>
-        <span className="font-headline text-sm leading-none">
+        <span className="font-headline text-sm leading-none pl-1">
           BOOKING
         </span>
       </Link>
