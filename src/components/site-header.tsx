@@ -7,10 +7,11 @@ import { UserNav } from "@/components/user-nav"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "./theme-toggle"
 import { ScrollArea, ScrollBar } from "./ui/scroll-area"
+import { cn } from "@/lib/utils"
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-primary text-primary-foreground animate-shine">
+    <header className={cn("sticky top-0 z-40 w-full border-b bg-primary text-primary-foreground animate-shine", "dark:bg-black")}>
       <div className="container px-4 md:px-6">
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex h-16 items-center justify-between gap-4">
