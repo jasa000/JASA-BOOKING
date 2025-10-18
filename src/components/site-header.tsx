@@ -16,15 +16,15 @@ export function SiteHeader() {
   return (
     <header className={cn(
         "sticky top-0 z-40 w-full border-b",
-        theme === 'dark' 
-            ? "dark:bg-black" 
-            : "bg-primary text-primary-foreground animate-shine [--shine-color-1:theme(colors.blue.300)] [--shine-color-2:theme(colors.blue.100)]"
+        theme === 'light' 
+            ? "bg-primary text-primary-foreground animate-shine [--shine-color-1:theme(colors.blue.300)] [--shine-color-2:theme(colors.blue.100)]"
+            : "dark:bg-black"
     )}>
       <div className="container px-4 md:px-6">
-        <div className="flex h-16 items-center">
+        <div className="relative flex h-16 items-center justify-between">
           
           <div className="flex items-center">
-            <Link href="/">
+            <Link href="/" className="hidden md:block">
               <Button variant="ghost" size="icon" className="hover:bg-primary/90 dark:hover:bg-gray-700">
                 <Home className="h-5 w-5" />
                 <span className="sr-only">Home</span>
@@ -33,8 +33,14 @@ export function SiteHeader() {
             <ThemeToggle />
           </div>
 
-          <div className="flex flex-1 justify-center">
-             <MainNav />
+          {/* Centered Title for Mobile */}
+          <div className="flex flex-1 justify-center md:hidden">
+            <MainNav />
+          </div>
+          
+          {/* Absolutely Centered Title for Desktop */}
+          <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <MainNav />
           </div>
           
           <div className="flex items-center">
