@@ -10,10 +10,10 @@ import React from 'react';
 // This AppBody component is the key. It's a client component that
 // can use the useTheme hook and reliably apply classes to the document body.
 function AppBody({ children }: { children: React.ReactNode }) {
-  const { colorTheme } = useTheme();
+  const { colorTheme, settingsLoading } = useTheme();
 
   // This logic now runs on every render on the client, ensuring the class is always correct.
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && !settingsLoading) {
     const body = document.body;
     
     // Create a new class list by filtering out any existing theme classes.
@@ -21,7 +21,8 @@ function AppBody({ children }: { children: React.ReactNode }) {
       (cls) => !cls.startsWith('theme-')
     );
 
-    // If there is a color theme from the DB, and it's not the default red, add its class.
+    // If there is a color theme from the DB, apply its class.
+    // The default theme (red) doesn't need a class, as its styles are in the :root.
     if (colorTheme && colorTheme !== 'red') {
       newClassList.push(`theme-${colorTheme}`);
     }
