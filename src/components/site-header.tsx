@@ -14,7 +14,7 @@ export function SiteHeader() {
     <header className={cn("sticky top-0 z-40 w-full border-b bg-primary text-primary-foreground animate-shine", "dark:bg-black dark:text-white")}>
       <div className="container px-4 md:px-6">
         <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex h-16 items-center justify-between gap-4">
+          <div className="flex h-16 items-center">
             <div className="flex items-center gap-2">
               <Link href="/">
                 <Button variant="ghost" size="icon" className="hover:bg-primary/90 dark:hover:bg-white/10">
@@ -24,7 +24,9 @@ export function SiteHeader() {
               </Link>
               <ThemeToggle />
             </div>
-            <MainNav />
+            <div className="flex flex-1 items-center justify-center">
+                <MainNav />
+            </div>
             <div className="flex items-center justify-end gap-2">
                 <Link href="/events/create">
                     <Button variant="ghost" size="icon" className="hover:bg-primary/90 dark:hover:bg-white/10">
