@@ -11,12 +11,11 @@ import React, { useEffect } from 'react';
 // This new AppBody component is the key. It's a client component that
 // can use the useTheme hook and reliably apply classes to the document body.
 function AppBody({ children }: { children: React.ReactNode }) {
-  const { colorTheme, previewColorTheme } = useTheme();
+  const { colorTheme } = useTheme();
 
   useEffect(() => {
     const body = document.body;
-    const activeTheme = previewColorTheme || colorTheme;
-
+    
     // Create a copy of the class list to safely iterate over while modifying it.
     const classesToRemove = [];
     for (const cls of body.classList) {
@@ -27,10 +26,10 @@ function AppBody({ children }: { children: React.ReactNode }) {
     body.classList.remove(...classesToRemove);
 
     // Add the new theme class.
-    if (activeTheme) {
-      body.classList.add(`theme-${activeTheme}`);
+    if (colorTheme) {
+      body.classList.add(`theme-${colorTheme}`);
     }
-  }, [colorTheme, previewColorTheme]);
+  }, [colorTheme]);
 
 
   return <>{children}</>;

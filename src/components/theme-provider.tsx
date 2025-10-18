@@ -23,8 +23,6 @@ type CustomThemeContextType = {
   defaultTheme: Theme;
   setDefaultTheme: (theme: Theme) => void;
   settingsLoading: boolean;
-  previewColorTheme: ColorTheme | null;
-  setPreviewColorTheme: (theme: ColorTheme | null) => void;
 }
 
 const initialThemeState: CustomThemeContextType = {
@@ -35,8 +33,6 @@ const initialThemeState: CustomThemeContextType = {
   defaultTheme: "system",
   setDefaultTheme: () => null,
   settingsLoading: true,
-  previewColorTheme: null,
-  setPreviewColorTheme: () => null,
 }
 
 const CustomThemeContext = React.createContext<CustomThemeContextType>(initialThemeState);
@@ -51,8 +47,6 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
     }, [firestore]);
 
     const { data: appSettings, loading: settingsLoading } = useDoc<AppSettings>(settingsDocRef);
-    
-    const [previewColorTheme, setPreviewColorTheme] = React.useState<ColorTheme | null>(null);
     
     const colorTheme = appSettings?.colorTheme || "zinc";
     const defaultTheme = appSettings?.defaultTheme || "system";
@@ -99,12 +93,10 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
         theme: (theme as Theme) || 'system',
         setTheme,
         colorTheme,
-        setColorTheme, // This now passes the REAL function
+        setColorTheme,
         defaultTheme,
-        setDefaultTheme, // This now passes the REAL function
+        setDefaultTheme,
         settingsLoading,
-        previewColorTheme,
-        setPreviewColorTheme,
     };
 
     return (

@@ -24,9 +24,7 @@ export default function AppearancePage() {
         setColorTheme, 
         defaultTheme, 
         setDefaultTheme,
-        settingsLoading,
-        previewColorTheme,
-        setPreviewColorTheme
+        settingsLoading
     } = useTheme();
 
     const [selectedDefaultTheme, setSelectedDefaultTheme] = useState<Theme | undefined>(defaultTheme);
@@ -39,29 +37,15 @@ export default function AppearancePage() {
             setSelectedDefaultTheme(defaultTheme);
         }
     }, [defaultTheme, settingsLoading]);
-    
-    // Effect to clean up preview on component unmount/navigation
-    useEffect(() => {
-        return () => {
-            setPreviewColorTheme(null);
-        };
-    }, [setPreviewColorTheme]);
 
-    const handleSelectColorTheme = (theme: ColorTheme) => {
-        setPreviewColorTheme(theme);
+    const handleSelectColorTheme = (newTheme: ColorTheme) => {
+        setColorTheme(newTheme);
+        toast({
+            title: "Color Theme Updated",
+            description: `The application theme has been set to '${newTheme}'.`,
+        });
     };
     
-    const handleSaveColor = () => {
-        if (previewColorTheme) {
-            setColorTheme(previewColorTheme);
-            setPreviewColorTheme(null); // Clear preview on save
-            toast({
-                title: "Color Theme Saved",
-                description: "Your new color theme has been applied application-wide.",
-            });
-        }
-    };
-
     const handleSaveDefaultTheme = () => {
         if(selectedDefaultTheme) {
             setDefaultTheme(selectedDefaultTheme);
@@ -72,15 +56,10 @@ export default function AppearancePage() {
         }
     };
 
-    const handleCancelColor = () => {
-        setPreviewColorTheme(null); // Clear preview on cancel
-    };
-    
     const handleCancelDefaultTheme = () => {
         setSelectedDefaultTheme(defaultTheme);
     }
 
-    const hasColorChanges = previewColorTheme !== null && previewColorTheme !== colorTheme;
     const hasThemeChanges = selectedDefaultTheme !== defaultTheme;
 
     if (settingsLoading) {
@@ -123,19 +102,11 @@ export default function AppearancePage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Global Color Theme</CardTitle>
-                        <CardDescription>Select a color palette for the UI (light mode only).</CardDescription>
+                        <CardDescription>Select a color palette for the UI (light mode only). The change is applied instantly.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <ThemeSelector selectedTheme={previewColorTheme || colorTheme} onSelectTheme={handleSelectColorTheme} />
+                        <ThemeSelector selectedTheme={colorTheme} onSelectTheme={handleSelectColorTheme} />
                     </CardContent>
-                    <CardFooter className="flex justify-end gap-2">
-                         {hasColorChanges && (
-                            <Button variant="ghost" onClick={handleCancelColor}>Cancel</Button>
-                         )}
-                        <Button onClick={handleSaveColor} disabled={!hasColorChanges}>
-                            Save Color Theme
-                        </Button>
-                    </CardFooter>
                 </Card>
                 <Card>
                     <CardHeader>
