@@ -17,6 +17,7 @@ export default function RootLayout({
       <head>
         <title>JASA BOOKING</title>
         <meta name="description" content="Your one-stop platform for event booking and management." />
+        <link rel="manifest" href="/manifest.json" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
