@@ -165,7 +165,7 @@ export default function RegisterPage() {
             </div>
              {password && <PasswordStrength score={strength} />}
           </div>
-          <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:opacity-90 transition-opacity" disabled={isSubmitting || isGoogleSubmitting}>
+          <Button type="submit" className="w-full" disabled={isSubmitting || isGoogleSubmitting}>
              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create an account
           </Button>
