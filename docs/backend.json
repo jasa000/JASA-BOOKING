@@ -131,6 +131,11 @@
           "type": "string",
           "description": "The active color theme for the application.",
           "enum": ["zinc", "red", "royal-blue", "light-blue", "royal-green"]
+        },
+        "defaultTheme": {
+            "type": "string",
+            "description": "The default appearance theme (light/dark/system) for new users.",
+            "enum": ["light", "dark", "system"]
         }
       }
     }

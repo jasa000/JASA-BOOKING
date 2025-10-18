@@ -17,10 +17,13 @@ type ThemeProviderProps = {
 }
 
 type ThemeProviderState = {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-  colorTheme: ColorTheme
-  setColorTheme: (theme: ColorTheme) => void
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  colorTheme: ColorTheme;
+  setColorTheme: (theme: ColorTheme) => void;
+  defaultTheme: Theme;
+  setDefaultTheme: (theme: Theme) => void;
+  settingsLoading: boolean;
 }
 
 const initialState: ThemeProviderState = {
@@ -28,6 +31,9 @@ const initialState: ThemeProviderState = {
   setTheme: () => null,
   colorTheme: "zinc",
   setColorTheme: () => null,
+  defaultTheme: "system",
+  setDefaultTheme: () => null,
+  settingsLoading: true,
 }
 
 const ThemeProviderContext = React.createContext<ThemeProviderState>(initialState)
@@ -35,18 +41,20 @@ const ThemeProviderContext = React.createContext<ThemeProviderState>(initialStat
 
 type AppSettings = {
     colorTheme?: ColorTheme;
+    defaultTheme?: Theme;
 }
 
 export function ThemeProvider({
   children,
-  defaultTheme = "light",
+  defaultTheme: fallbackTheme = "system",
   defaultColorTheme = "red",
   storageKey = "ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(defaultTheme);
-  const firestore = useFirestore();
+  const [theme, setTheme] = React.useState<Theme>(fallbackTheme)
 
+  const firestore = useFirestore();
+  
   const settingsDocRef = React.useMemo(() => {
     if (!firestore) return null;
     return doc(firestore, 'settings', 'app-config');
@@ -55,14 +63,17 @@ export function ThemeProvider({
   const { data: appSettings, loading: settingsLoading } = useDoc<AppSettings>(settingsDocRef);
   
   const colorTheme = React.useMemo(() => appSettings?.colorTheme || defaultColorTheme, [appSettings, defaultColorTheme]);
-
+  const defaultTheme = React.useMemo(() => appSettings?.defaultTheme || fallbackTheme, [appSettings, fallbackTheme]);
 
   React.useEffect(() => {
-    const storedTheme = localStorage.getItem(storageKey) as Theme | null;
+    const storedTheme = localStorage.getItem(storageKey) as Theme | null
+    // If there's a theme in local storage, use it. Otherwise, use the default from the database.
     if (storedTheme) {
-      setTheme(storedTheme);
+        setTheme(storedTheme)
+    } else if (!settingsLoading) {
+        setTheme(defaultTheme);
     }
-  }, [storageKey]);
+  }, [storageKey, defaultTheme, settingsLoading]);
   
 
   React.useEffect(() => {
@@ -82,12 +93,12 @@ export function ThemeProvider({
     const body = window.document.body;
     const previewTheme = body.dataset.previewTheme as ColorTheme | undefined;
 
-    themes.forEach(t => root.classList.remove(`theme-${t}`));
-
+    themes.forEach(t => body.classList.remove(`theme-${t}`));
+    
     if (effectiveTheme === 'light') {
         const themeToApply = previewTheme || colorTheme;
         if (themeToApply !== "zinc") {
-            root.classList.add(`theme-${themeToApply}`);
+            body.classList.add(`theme-${themeToApply}`);
         }
     }
   }, [theme, colorTheme, settingsLoading])
@@ -95,9 +106,7 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (newTheme: Theme) => {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(storageKey, newTheme)
-      }
+      localStorage.setItem(storageKey, newTheme)
       setTheme(newTheme)
     },
     colorTheme,
@@ -106,6 +115,13 @@ export function ThemeProvider({
             setDoc(settingsDocRef, { colorTheme: newColorTheme }, { merge: true });
         }
     },
+    defaultTheme,
+    setDefaultTheme: (newDefaultTheme: Theme) => {
+        if (settingsDocRef) {
+            setDoc(settingsDocRef, { defaultTheme: newDefaultTheme }, { merge: true });
+        }
+    },
+    settingsLoading,
   }
 
   return (

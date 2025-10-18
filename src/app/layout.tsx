@@ -12,18 +12,13 @@ import React from 'react';
 // This component now needs to be a client component to use the useTheme hook.
 // We wrap the main layout logic in a component that can access the theme context.
 function AppBody({ children }: { children: React.ReactNode }) {
-  const { theme, colorTheme } = useTheme();
-  const [isClient, setIsClient] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
-
+  const { colorTheme } = useTheme();
 
   return (
     <body
       className={cn(
-        'font-body antialiased min-h-screen bg-background'
+        'font-body antialiased min-h-screen bg-background',
+        colorTheme !== 'zinc' && 'theme-' + colorTheme
       )}
     >
       <FirebaseClientProvider>
