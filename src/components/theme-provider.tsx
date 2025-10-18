@@ -25,17 +25,7 @@ type CustomThemeContextType = {
   settingsLoading: boolean;
 }
 
-const initialThemeState: CustomThemeContextType = {
-  theme: "system",
-  setTheme: () => null,
-  colorTheme: "zinc",
-  setColorTheme: () => null,
-  defaultTheme: "system",
-  setDefaultTheme: () => null,
-  settingsLoading: true,
-}
-
-const CustomThemeContext = React.createContext<CustomThemeContextType>(initialThemeState);
+const CustomThemeContext = React.createContext<CustomThemeContextType | null>(null);
 
 function CustomThemeProvider({ children }: { children: React.ReactNode }) {
     const firestore = useFirestore();
@@ -75,6 +65,7 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
 
     // Effect to set the initial theme based on localStorage or Firestore default
     React.useEffect(() => {
+      if (settingsLoading) return;
       let storedTheme = null;
       try {
         storedTheme = localStorage.getItem("theme");
@@ -83,7 +74,7 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
       }
       if (storedTheme && ['light', 'dark', 'system'].includes(storedTheme)) {
         setNextTheme(storedTheme as Theme);
-      } else if (!settingsLoading) {
+      } else {
         setNextTheme(defaultTheme);
       }
     }, [defaultTheme, settingsLoading, setNextTheme]);
@@ -123,7 +114,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 export const useTheme = () => {
   const context = React.useContext(CustomThemeContext);
 
-  if (context === undefined) {
+  if (context === undefined || context === null) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
 

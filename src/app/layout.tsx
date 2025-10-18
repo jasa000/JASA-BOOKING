@@ -11,9 +11,8 @@ import React, { useEffect } from 'react';
 function AppBody({ children }: { children: React.ReactNode }) {
   const { colorTheme, settingsLoading } = useTheme();
 
-  useEffect(() => {
-    if (settingsLoading) return; // Wait until settings are loaded
-
+  // This logic now runs on every render to ensure the class is always correct.
+  if (typeof window !== 'undefined' && !settingsLoading) {
     const body = document.body;
     
     // Create a new class list by filtering out any existing theme classes.
@@ -22,13 +21,13 @@ function AppBody({ children }: { children: React.ReactNode }) {
     );
 
     // Always add the class for the currently loaded theme.
-    if (colorTheme) {
+    // If the theme is the default "zinc", no class is needed.
+    if (colorTheme && colorTheme !== 'zinc') {
       newClassList.push(`theme-${colorTheme}`);
     }
     
     body.className = newClassList.join(' ');
-
-  }, [colorTheme, settingsLoading]);
+  }
 
 
   return <>{children}</>;

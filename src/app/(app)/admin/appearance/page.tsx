@@ -27,7 +27,7 @@ export default function AppearancePage() {
         settingsLoading
     } = useTheme();
 
-    const [selectedDefaultTheme, setSelectedDefaultTheme] = useState<Theme | undefined>(defaultTheme);
+    const [selectedDefaultTheme, setSelectedDefaultTheme] = useState<Theme | undefined>(undefined);
 
     const { toast } = useToast();
 
@@ -42,7 +42,7 @@ export default function AppearancePage() {
         setColorTheme(newTheme);
         toast({
             title: "Color Theme Updated",
-            description: `The application theme has been set to '${newTheme}'.`,
+            description: `The application theme has been set to '${newTheme}'. The change is applied instantly.`,
         });
     };
     
@@ -62,7 +62,7 @@ export default function AppearancePage() {
 
     const hasThemeChanges = selectedDefaultTheme !== defaultTheme;
 
-    if (settingsLoading) {
+    if (settingsLoading || selectedDefaultTheme === undefined) {
         return (
             <div className="container mx-auto px-4 py-8">
                  <div className="space-y-2 mb-8">
