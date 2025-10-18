@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/menubar';
 import Link from 'next/link';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
-import { AppearanceMenu } from './appearance-menu';
 
 export function AdminMenu() {
   const { user, loading } = useUser();
@@ -96,8 +95,14 @@ export function AdminMenu() {
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
+              <MenubarMenu>
+                <Link href="/admin/appearance">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
+                        Appearance
+                    </MenubarTrigger>
+                </Link>
+              </MenubarMenu>
             </Menubar>
-            <AppearanceMenu />
         </div>
          <ScrollBar orientation="horizontal" className="invisible" />
       </ScrollArea>
