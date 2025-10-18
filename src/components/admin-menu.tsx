@@ -48,7 +48,7 @@ export function AdminMenu() {
         "dark:bg-black dark:text-white"
     )}>
       <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex h-12 items-center justify-between px-4 md:px-6">
+        <div className="flex h-12 items-center px-4 md:px-6">
             <Menubar className="border-none rounded-none p-0 h-auto bg-transparent">
               <MenubarMenu>
                 <Link href="/admin">
