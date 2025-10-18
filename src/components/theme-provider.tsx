@@ -39,70 +39,82 @@ type AppSettings = {
     defaultTheme?: Theme;
 }
 
-export function ThemeProvider({ children, ...props }: React.ComponentProps<typeof NextThemesProvider>) {
-  const firestore = useFirestore();
-  const { theme, setTheme } = useNextTheme();
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
   
-  const settingsDocRef = React.useMemo(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'settings', 'app-config');
-  }, [firestore]);
-
-  const { data: appSettings, loading: settingsLoading } = useDoc<AppSettings>(settingsDocRef);
-  
-  const colorTheme = React.useMemo(() => appSettings?.colorTheme || "zinc", [appSettings]);
-  const defaultTheme = React.useMemo(() => appSettings?.defaultTheme || "system", [appSettings]);
-
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-        const storedTheme = localStorage.getItem("ui-theme") as Theme | null
-        if (!storedTheme && !settingsLoading) {
-          setTheme(defaultTheme);
-        }
-    }
-  }, [defaultTheme, settingsLoading, setTheme]);
-
-   React.useEffect(() => {
-    const body = document.body;
-    const themes = ["zinc", "red", "royal-blue", "light-blue", "royal-green"];
-    
-    body.classList.remove(...themes.map(t => `theme-${t}`));
-
-    if (!settingsLoading && colorTheme) {
-      body.classList.add(`theme-${colorTheme}`);
-    }
-  }, [colorTheme, settingsLoading]);
-
-
-  const value = {
-    theme: (theme as Theme) || 'system',
-    setTheme: (newTheme: Theme) => {
-      setTheme(newTheme);
-      if (typeof window !== "undefined") {
-          localStorage.setItem("ui-theme", newTheme);
-      }
-    },
-    colorTheme,
-    setColorTheme: (newColorTheme: ColorTheme) => {
-        if (settingsDocRef) {
-            setDoc(settingsDocRef, { colorTheme: newColorTheme }, { merge: true });
-        }
-    },
-    defaultTheme,
-    setDefaultTheme: (newDefaultTheme: Theme) => {
-        if (settingsDocRef) {
-            setDoc(settingsDocRef, { defaultTheme: newDefaultTheme }, { merge: true });
-        }
-    },
-    settingsLoading,
-  }
-
   return (
-    <CustomThemeContext.Provider value={value}>
-        {children}
-    </CustomThemeContext.Provider>
+    <NextThemesProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+    >
+        <InnerThemeProvider>{children}</InnerThemeProvider>
+    </NextThemesProvider>
   )
 }
+
+function InnerThemeProvider({ children }: { children: React.ReactNode }) {
+    const firestore = useFirestore();
+    const { theme, setTheme } = useNextTheme();
+
+    const settingsDocRef = React.useMemo(() => {
+        if (!firestore) return null;
+        return doc(firestore, 'settings', 'app-config');
+    }, [firestore]);
+
+    const { data: appSettings, loading: settingsLoading } = useDoc<AppSettings>(settingsDocRef);
+    
+    const colorTheme = React.useMemo(() => appSettings?.colorTheme || "zinc", [appSettings]);
+    const defaultTheme = React.useMemo(() => appSettings?.defaultTheme || "system", [appSettings]);
+
+    React.useEffect(() => {
+        // Set initial theme based on default from DB if no user preference is stored
+        const storedTheme = localStorage.getItem("theme");
+        if (!storedTheme && !settingsLoading) {
+            setTheme(defaultTheme);
+        }
+    }, [defaultTheme, settingsLoading, setTheme]);
+
+    React.useEffect(() => {
+        const body = document.body;
+        const themes = ["zinc", "red", "royal-blue", "light-blue", "royal-green"];
+        
+        body.classList.remove(...themes.map(t => `theme-${t}`));
+
+        if (colorTheme) {
+            body.classList.add(`theme-${colorTheme}`);
+        }
+    }, [colorTheme]);
+
+    const value = {
+        theme: (theme as Theme) || 'system',
+        setTheme: (newTheme: Theme) => {
+            setTheme(newTheme);
+        },
+        colorTheme,
+        setColorTheme: (newColorTheme: ColorTheme) => {
+            if (settingsDocRef) {
+                setDoc(settingsDocRef, { colorTheme: newColorTheme }, { merge: true });
+            }
+        },
+        defaultTheme,
+        setDefaultTheme: (newDefaultTheme: Theme) => {
+            if (settingsDocRef) {
+                setDoc(settingsDocRef, { defaultTheme: newDefaultTheme }, { merge: true });
+            }
+        },
+        settingsLoading,
+    }
+
+    return (
+        <CustomThemeContext.Provider value={value}>
+             <div className={cn('font-body antialiased min-h-screen bg-background')}>
+                {children}
+             </div>
+        </CustomThemeContext.Provider>
+    );
+}
+
 
 export const useTheme = () => {
   const context = React.useContext(CustomThemeContext)
