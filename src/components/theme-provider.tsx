@@ -87,25 +87,6 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
     }, [defaultTheme, settingsLoading, setNextTheme]);
 
 
-    // Effect to apply the color theme class to the body
-    React.useEffect(() => {
-        if (settingsLoading) return;
-
-        const body = document.body;
-        const activeTheme = previewColorTheme || colorTheme;
-
-        // Clean up old themes
-        body.classList.forEach(className => {
-            if (className.startsWith('theme-')) {
-                body.classList.remove(className);
-            }
-        });
-        
-        // Add the new theme
-        body.classList.add(`theme-${activeTheme}`);
-
-    }, [colorTheme, previewColorTheme, settingsLoading]);
-
     const value = {
         theme: (theme as Theme) || 'system',
         setTheme,
