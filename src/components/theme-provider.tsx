@@ -75,17 +75,6 @@ function InnerThemeProvider({ children }: { children: React.ReactNode }) {
         }
     }, [defaultTheme, settingsLoading, setTheme]);
 
-    React.useEffect(() => {
-        const body = document.body;
-        const themes = ["zinc", "red", "royal-blue", "light-blue", "royal-green"];
-        
-        body.classList.remove(...themes.map(t => `theme-${t}`));
-
-        if (colorTheme) {
-            body.classList.add(`theme-${colorTheme}`);
-        }
-    }, [colorTheme]);
-
     const value = {
         theme: (theme as Theme) || 'system',
         setTheme: (newTheme: Theme) => {
@@ -108,9 +97,7 @@ function InnerThemeProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <CustomThemeContext.Provider value={value}>
-             <div className={cn('font-body antialiased min-h-screen bg-background')}>
-                {children}
-             </div>
+            {children}
         </CustomThemeContext.Provider>
     );
 }
