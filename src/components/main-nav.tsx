@@ -1,5 +1,5 @@
 
-"use client";
+"use client"
 
 import * as React from "react"
 import Link from "next/link"
@@ -17,7 +17,10 @@ export function MainNav({
       {...props}
     >
       <Link href="/" className="flex flex-col items-center space-y-0">
-        <span className="font-bold font-headline text-lg tracking-widest leading-none">
+        <span 
+          className="font-bold font-headline text-lg leading-none"
+          style={{ letterSpacing: '0.4em' }}
+        >
           JASA
         </span>
         <span className="font-headline text-sm leading-none">
