@@ -41,7 +41,7 @@ export function InstitutionFilter() {
 
   return (
     <div className="container py-8">
-      <h2 className="text-3xl font-bold font-headline mb-6">Browse by Institution</h2>
+      <h2 className="text-3xl font-bold font-headline mb-6 text-center">Browse by Institution</h2>
       <ScrollArea className="w-full">
         <div className="flex gap-6 pb-4">
           {loading

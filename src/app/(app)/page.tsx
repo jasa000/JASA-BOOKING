@@ -76,7 +76,7 @@ export default function EventsPage() {
       </div>
       
       <div className="container mx-auto px-4 py-8">
-         <h2 className="text-2xl md:text-3xl font-bold font-headline mb-6">Upcoming Events</h2>
+         <h2 className="text-2xl md:text-3xl font-bold font-headline mb-6 text-center">Upcoming Events</h2>
         {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {[...Array(8)].map((_, i) => (
