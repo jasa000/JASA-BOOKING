@@ -42,55 +42,55 @@ export function AdminMenu() {
   }
 
   return (
-    <div className="sticky top-16 z-30 border-b bg-secondary text-secondary-foreground">
+    <div className="sticky top-16 z-30 border-b bg-primary text-primary-foreground">
       <ScrollArea className="w-full whitespace-nowrap">
         <div className="container flex h-12 items-center px-4 md:px-6">
             <Menubar className="border-none rounded-none p-0 h-auto bg-transparent">
               <MenubarMenu>
                 <Link href="/admin">
-                  <MenubarTrigger className="cursor-pointer">
+                  <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
                     Admin Dashboard
                   </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/">
-                  <MenubarTrigger className="cursor-pointer">
+                  <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
                     User Dashboard
                   </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/admin/pending-events">
-                    <MenubarTrigger className="cursor-pointer">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
                         Pending Events
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/admin/users">
-                    <MenubarTrigger className="cursor-pointer">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
                         Manage Users
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/admin/categories">
-                    <MenubarTrigger className="cursor-pointer">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
                         Categories
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/admin/institution">
-                    <MenubarTrigger className="cursor-pointer">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
                         INSTITUTION
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
                <MenubarMenu>
                 <Link href="/admin/photos">
-                    <MenubarTrigger className="cursor-pointer">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
                         Manage Photos
                     </MenubarTrigger>
                 </Link>
