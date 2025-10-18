@@ -58,7 +58,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="container mx-auto px-4 py-8">
         <div className="space-y-2 mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Admin Dashboard</h1>
             <p className="text-muted-foreground">An overview of your application's data.</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

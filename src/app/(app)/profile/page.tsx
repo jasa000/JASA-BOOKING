@@ -599,12 +599,12 @@ export default function ProfilePage() {
               <AccordionItem value="item-1">
                 <AccordionTrigger>Password Reset</AccordionTrigger>
                 <AccordionContent>
-                  <div className="flex items-center justify-between p-4 border rounded-md">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border rounded-md gap-4">
                       <div>
                         <h3 className="font-medium">Password</h3>
                         <p className="text-sm text-muted-foreground">Reset your password via email. Limited to one request per 6 hours.</p>
                       </div>
-                      <Button variant="outline" onClick={handlePasswordReset} disabled={resetCooldown > 0}>
+                      <Button variant="outline" onClick={handlePasswordReset} disabled={resetCooldown > 0} className="w-full md:w-auto">
                         {resetCooldown > 0 ? `Try again in ${cooldownDisplay}`: "Send Reset Link"}
                       </Button>
                   </div>

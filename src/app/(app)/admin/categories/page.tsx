@@ -215,8 +215,8 @@ export default function CategoriesPage() {
 
 
   return (
-    <div className="container mx-auto px-4 py-8 grid gap-8 md:grid-cols-3">
-      <div className="md:col-span-1">
+    <div className="container mx-auto px-4 py-8 grid gap-8 md:grid-cols-1 lg:grid-cols-3">
+      <div className="lg:col-span-1">
         <Card>
           <CardHeader>
             <CardTitle>{editingCategory ? 'Edit Category' : 'Add New Category'}</CardTitle>
@@ -288,7 +288,7 @@ export default function CategoriesPage() {
         </Card>
       </div>
 
-      <div className="md:col-span-2">
+      <div className="lg:col-span-2 mt-8 lg:mt-0">
         <Card>
           <CardHeader>
             <CardTitle>Manage Categories</CardTitle>

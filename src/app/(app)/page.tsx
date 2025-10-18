@@ -63,8 +63,8 @@ export default function EventsPage() {
       <WelcomeBanner />
       
        <div className="border-b">
-         <div className='container pt-4 bg-background'>
-            <h3 className="text-lg font-semibold mb-2 font-headline">Browse by Category</h3>
+         <div className='container pt-4 md:pt-6 bg-background'>
+            <h3 className="text-base md:text-lg font-semibold mb-2 font-headline">Browse by Category</h3>
          </div>
          <div className='bg-primary text-primary-foreground'>
             <div className='container py-2'>
@@ -74,7 +74,7 @@ export default function EventsPage() {
       </div>
       
       <div className="mt-8">
-         <h2 className="text-3xl font-bold font-headline mb-6">Upcoming Events</h2>
+         <h2 className="text-2xl md:text-3xl font-bold font-headline mb-6">Upcoming Events</h2>
         {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {[...Array(8)].map((_, i) => (
@@ -121,8 +121,8 @@ export default function EventsPage() {
       ) : (
         <div className="container py-8 text-center">
             <Card className="max-w-2xl mx-auto">
-                <CardContent className="p-8">
-                    <h2 className="text-2xl font-bold font-headline mb-4">View Events by Institution</h2>
+                <CardContent className="p-6 md:p-8">
+                    <h2 className="text-xl md:text-2xl font-bold font-headline mb-4">View Events by Institution</h2>
                     <p className="text-muted-foreground mb-6">
                         Log in or create an account to browse events hosted by specific colleges and institutions.
                     </p>
