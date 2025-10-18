@@ -47,11 +47,11 @@ type AppSettings = {
 export function ThemeProvider({
   children,
   defaultTheme: fallbackTheme = "system",
-  defaultColorTheme = "red",
+  defaultColorTheme = "zinc",
   storageKey = "ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(fallbackTheme)
+  const [theme, setTheme] = React.useState<Theme>(() => (typeof window !== 'undefined' ? localStorage.getItem(storageKey) as Theme : null) || fallbackTheme);
 
   const firestore = useFirestore();
   
@@ -97,7 +97,7 @@ export function ThemeProvider({
     
     if (effectiveTheme === 'light') {
         const themeToApply = previewTheme || colorTheme;
-        if (themeToApply !== "zinc") {
+        if (themeToApply && themeToApply !== "zinc") {
             body.classList.add(`theme-${themeToApply}`);
         }
     }
