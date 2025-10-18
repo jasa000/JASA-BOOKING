@@ -123,11 +123,9 @@ export default function EventsPage() {
       ) : (
         <div className="py-8 text-center">
             <h2 className="text-3xl font-bold font-headline mb-6 text-center">Browse by Institution</h2>
-            <div className="container">
-                <p className="text-muted-foreground">
-                    This section is only accessible when a user is logged in.
-                </p>
-            </div>
+            <p className="text-muted-foreground">
+                This section is only accessible when a user is logged in.
+            </p>
         </div>
       )}
     </>
