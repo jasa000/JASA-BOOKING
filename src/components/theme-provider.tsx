@@ -4,7 +4,8 @@
 import { useDoc, useFirestore } from "@/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import * as React from "react"
-import { useTheme as useNextTheme } from "next-themes";
+import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 export type Theme = "light" | "dark" | "system";
 export type ColorTheme = "zinc" | "red" | "royal-blue" | "light-blue" | "royal-green";
@@ -38,12 +39,7 @@ type AppSettings = {
     defaultTheme?: Theme;
 }
 
-export function ThemeProvider({ children, ...props }: React.ComponentProps<typeof import("next-themes").ThemeProvider>) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
-}
-
-
-function NextThemesProvider({ children, ...props }: React.ComponentProps<typeof import("next-themes").ThemeProvider>) {
+export function ThemeProvider({ children, ...props }: React.ComponentProps<typeof NextThemesProvider>) {
   const firestore = useFirestore();
   const { theme, setTheme } = useNextTheme();
   
@@ -58,9 +54,11 @@ function NextThemesProvider({ children, ...props }: React.ComponentProps<typeof 
   const defaultTheme = React.useMemo(() => appSettings?.defaultTheme || "system", [appSettings]);
 
   React.useEffect(() => {
-    const storedTheme = localStorage.getItem("ui-theme") as Theme | null
-    if (!storedTheme && !settingsLoading) {
-      setTheme(defaultTheme);
+    if (typeof window !== 'undefined') {
+        const storedTheme = localStorage.getItem("ui-theme") as Theme | null
+        if (!storedTheme && !settingsLoading) {
+          setTheme(defaultTheme);
+        }
     }
   }, [defaultTheme, settingsLoading, setTheme]);
 
@@ -70,7 +68,7 @@ function NextThemesProvider({ children, ...props }: React.ComponentProps<typeof 
     
     body.classList.remove(...themes.map(t => `theme-${t}`));
 
-    if (!settingsLoading && colorTheme && colorTheme !== 'zinc') {
+    if (!settingsLoading && colorTheme) {
       body.classList.add(`theme-${colorTheme}`);
     }
   }, [colorTheme, settingsLoading]);
@@ -80,6 +78,9 @@ function NextThemesProvider({ children, ...props }: React.ComponentProps<typeof 
     theme: (theme as Theme) || 'system',
     setTheme: (newTheme: Theme) => {
       setTheme(newTheme);
+      if (typeof window !== "undefined") {
+          localStorage.setItem("ui-theme", newTheme);
+      }
     },
     colorTheme,
     setColorTheme: (newColorTheme: ColorTheme) => {
@@ -98,7 +99,7 @@ function NextThemesProvider({ children, ...props }: React.ComponentProps<typeof 
 
   return (
     <CustomThemeContext.Provider value={value}>
-      {children}
+        {children}
     </CustomThemeContext.Provider>
   )
 }
