@@ -72,13 +72,22 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
     const setTheme = useCallback((newTheme: Theme) => {
         setNextTheme(newTheme);
         // Persist user's preference in localStorage
-        localStorage.setItem("theme", newTheme);
+        try {
+            localStorage.setItem("theme", newTheme);
+        } catch (e) {
+            // localStorage is not available
+        }
     }, [setNextTheme]);
 
 
     // Effect to set the initial theme based on localStorage or Firestore default
     React.useEffect(() => {
-      const storedTheme = localStorage.getItem("theme");
+      let storedTheme = null;
+      try {
+        storedTheme = localStorage.getItem("theme");
+      } catch (e) {
+        // localStorage is not available
+      }
       if (storedTheme) {
         setNextTheme(storedTheme as Theme);
       } else if (!settingsLoading) {

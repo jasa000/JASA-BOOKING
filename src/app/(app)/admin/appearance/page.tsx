@@ -49,7 +49,9 @@ export default function AppearancePage() {
     };
     
     const handleSaveColor = () => {
-        setColorTheme(selectedColorTheme);
+        if (previewColorTheme) {
+            setColorTheme(previewColorTheme);
+        }
         setPreviewColorTheme(null); // Clear preview on save
         toast({
             title: "Color Theme Saved",
@@ -83,7 +85,7 @@ export default function AppearancePage() {
         };
     }, [setPreviewColorTheme]);
 
-    const hasColorChanges = selectedColorTheme !== colorTheme;
+    const hasColorChanges = previewColorTheme !== null;
     const hasThemeChanges = selectedDefaultTheme !== defaultTheme;
 
     if (settingsLoading) {
@@ -129,7 +131,7 @@ export default function AppearancePage() {
                         <CardDescription>Select a color palette for the UI (light mode only).</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <ThemeSelector selectedTheme={selectedColorTheme} onSelectTheme={handleSelectColorTheme} />
+                        <ThemeSelector selectedTheme={previewColorTheme || colorTheme} onSelectTheme={handleSelectColorTheme} />
                     </CardContent>
                     <CardFooter className="flex justify-end gap-2">
                          {hasColorChanges && (

@@ -15,18 +15,20 @@ function AppBody({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const body = document.body;
     // Clean up all old theme classes
-    body.classList.forEach(className => {
-      if (className.startsWith('theme-')) {
-        body.classList.remove(className);
-      }
-    });
+    const classList = Array.from(body.classList);
+    for (const className of classList) {
+        if (className.startsWith('theme-')) {
+            body.classList.remove(className);
+        }
+    }
 
     // Add the new theme class
     const activeTheme = previewColorTheme || colorTheme;
-    if (!settingsLoading) {
+    if (activeTheme) {
       body.classList.add(`theme-${activeTheme}`);
     }
   }, [colorTheme, previewColorTheme, settingsLoading]);
+
 
   return <>{children}</>;
 }
