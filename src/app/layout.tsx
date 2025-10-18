@@ -50,8 +50,7 @@ export default function RootLayout({
       </head>
       <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
         >
         <AppBody>
           {children}
