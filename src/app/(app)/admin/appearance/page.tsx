@@ -184,38 +184,6 @@ export default function AppearancePage() {
                     </CardFooter>
                 </Card>
             </div>
-             <Card className="mt-8">
-                <CardHeader>
-                    <CardTitle>Your Personal Theme Preference</CardTitle>
-                    <CardDescription>This setting is saved on your device and overrides the global default.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex gap-2">
-                        <Button
-                        variant={theme === 'light' ? 'default' : 'outline'}
-                        onClick={() => setUserTheme('light')}
-                        className={cn("flex-1", theme === 'light' && "ring-2 ring-ring")}
-                    >
-                        <Sun className="mr-2 h-4 w-4" />
-                        Light
-                    </Button>
-                    <Button
-                        variant={theme === 'dark' ? 'default' : 'outline'}
-                        onClick={() => setUserTheme('dark')}
-                        className={cn("flex-1", theme === 'dark' && "ring-2 ring-ring")}
-                    >
-                        <Moon className="mr-2 h-4 w-4" />
-                        Dark
-                    </Button>
-                        <Button
-                        variant={theme === 'system' ? 'default' : 'outline'}
-                        onClick={() => setUserTheme('system')}
-                        className={cn("flex-1", theme === 'system' && "ring-2 ring-ring")}
-                    >
-                        <Monitor className="mr-2 h-4 w-4" />
-                        System
-                    </Button>
-                </CardContent>
-            </Card>
         </div>
     );
 }
