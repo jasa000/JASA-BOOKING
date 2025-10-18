@@ -17,15 +17,16 @@ function AppBody({ children }: { children: React.ReactNode }) {
     const body = document.body;
     const activeTheme = previewColorTheme || colorTheme;
 
-    // Clean up any existing theme classes
-    body.classList.forEach(className => {
-      if (className.startsWith('theme-')) {
-        body.classList.remove(className);
-      }
-    });
+    // Create a copy of the class list to safely iterate over while modifying it.
+    const classesToRemove = [];
+    for (const cls of body.classList) {
+        if (cls.startsWith('theme-')) {
+            classesToRemove.push(cls);
+        }
+    }
+    body.classList.remove(...classesToRemove);
 
-    // Add the new theme class. This logic is now simplified to always
-    // apply the active theme, fixing the bug where it was stuck on zinc.
+    // Add the new theme class.
     if (activeTheme) {
       body.classList.add(`theme-${activeTheme}`);
     }
