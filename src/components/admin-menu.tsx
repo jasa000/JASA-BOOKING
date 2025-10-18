@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/menubar';
 import Link from 'next/link';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 export function AdminMenu() {
   const { user, loading } = useUser();
@@ -42,55 +43,58 @@ export function AdminMenu() {
   }
 
   return (
-    <div className="sticky top-16 z-30 border-b bg-primary text-primary-foreground">
+    <div className={cn(
+        "sticky top-16 z-30 border-b bg-primary text-primary-foreground",
+        "dark:bg-black dark:text-white"
+    )}>
       <ScrollArea className="w-full whitespace-nowrap">
         <div className="container flex h-12 items-center justify-between px-4 md:px-6">
             <Menubar className="border-none rounded-none p-0 h-auto bg-transparent">
               <MenubarMenu>
                 <Link href="/admin">
-                  <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
+                  <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
                     Admin Dashboard
                   </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/">
-                  <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
+                  <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
                     User Dashboard
                   </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/admin/pending-events">
-                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
                         Pending Events
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/admin/users">
-                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
                         Manage Users
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/admin/categories">
-                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
                         Categories
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/admin/institution">
-                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
                         INSTITUTION
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
                <MenubarMenu>
                 <Link href="/admin/photos">
-                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
                         Manage Photos
                     </MenubarTrigger>
                 </Link>
