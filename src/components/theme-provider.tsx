@@ -1,17 +1,20 @@
 
 "use client"
 
-import { useDoc, useFirestore } from "@/firebase";
-import { doc, setDoc } from "firebase/firestore";
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from "next-themes";
-import { cn } from "@/lib/utils";
+import { useDoc, useFirestore } from "@/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 export type Theme = "light" | "dark" | "system";
 export type ColorTheme = "zinc" | "red" | "royal-blue" | "light-blue" | "royal-green";
 
+type AppSettings = {
+    colorTheme?: ColorTheme;
+    defaultTheme?: Theme;
+}
 
-type ThemeProviderState = {
+type CustomThemeContextType = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   colorTheme: ColorTheme;
@@ -21,7 +24,7 @@ type ThemeProviderState = {
   settingsLoading: boolean;
 }
 
-const initialState: ThemeProviderState = {
+const initialThemeState: CustomThemeContextType = {
   theme: "system",
   setTheme: () => null,
   colorTheme: "zinc",
@@ -31,16 +34,9 @@ const initialState: ThemeProviderState = {
   settingsLoading: true,
 }
 
-const CustomThemeContext = React.createContext<ThemeProviderState>(initialState)
-
-
-type AppSettings = {
-    colorTheme?: ColorTheme;
-    defaultTheme?: Theme;
-}
+const CustomThemeContext = React.createContext<CustomThemeContextType>(initialThemeState);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  
   return (
     <NextThemesProvider
         attribute="class"
@@ -48,7 +44,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         enableSystem
         disableTransitionOnChange
     >
-        <InnerThemeProvider>{children}</InnerThemeProvider>
+      <InnerThemeProvider>{children}</InnerThemeProvider>
     </NextThemesProvider>
   )
 }
@@ -68,7 +64,6 @@ function InnerThemeProvider({ children }: { children: React.ReactNode }) {
     const defaultTheme = React.useMemo(() => appSettings?.defaultTheme || "system", [appSettings]);
 
     React.useEffect(() => {
-        // Set initial theme based on default from DB if no user preference is stored
         const storedTheme = localStorage.getItem("theme");
         if (!storedTheme && !settingsLoading) {
             setTheme(defaultTheme);
@@ -102,12 +97,12 @@ function InnerThemeProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
-
 export const useTheme = () => {
-  const context = React.useContext(CustomThemeContext)
+  const context = React.useContext(CustomThemeContext);
 
-  if (context === undefined)
-    throw new Error("useTheme must be used within a ThemeProvider")
+  if (context === undefined) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
 
-  return context
-}
+  return context;
+};

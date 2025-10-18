@@ -1,27 +1,15 @@
 
-'use client';
-
+import type { Metadata } from 'next';
 import './globals.css';
-import { ThemeProvider, useTheme } from '@/components/theme-provider';
+import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-import { cn } from '@/lib/utils';
-import React from 'react';
+import { ThemeWrapper } from '@/components/theme-wrapper';
 
-function AppBody({ children }: { children: React.ReactNode }) {
-  const { colorTheme, settingsLoading } = useTheme();
-
-  return (
-    <body
-      className={cn(
-        'font-body antialiased min-h-screen bg-background',
-        !settingsLoading && colorTheme !== 'zinc' && `theme-${colorTheme}`
-      )}
-    >
-      {children}
-    </body>
-  );
-}
+export const metadata: Metadata = {
+  title: 'JASA BOOKING',
+  description: 'Your one-stop platform for event booking and management.',
+};
 
 export default function RootLayout({
   children,
@@ -36,14 +24,14 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
       </head>
-      <ThemeProvider>
-        <AppBody>
-          <FirebaseClientProvider>
-            {children}
-          </FirebaseClientProvider>
-          <Toaster />
-        </AppBody>
-      </ThemeProvider>
+      <body>
+        <ThemeProvider>
+            <ThemeWrapper>
+                <FirebaseClientProvider>{children}</FirebaseClientProvider>
+                <Toaster />
+            </ThemeWrapper>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
