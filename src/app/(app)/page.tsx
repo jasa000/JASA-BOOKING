@@ -73,6 +73,36 @@ export default function EventsPage() {
          </div>
       </div>
       
+      <div className="mt-8">
+         <h2 className="text-3xl font-bold font-headline mb-6">Upcoming Events</h2>
+        {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {[...Array(8)].map((_, i) => (
+                <div key={i} className="flex flex-col space-y-3">
+                    <Skeleton className="h-[180px] w-full rounded-xl" />
+                    <div className="space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                    </div>
+                </div>
+                ))}
+            </div>
+        ) : filteredEvents && filteredEvents.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {filteredEvents.map((event) => (
+                    <EventCard key={event.id} event={event} />
+                ))}
+            </div>
+        ) : (
+            <div className="col-span-full text-center py-20 text-muted-foreground">
+                <h2 className="text-2xl font-semibold">No Events Found</h2>
+                <p>
+                There are currently no events in the &quot;{selectedCategory}&quot; category.
+                </p>
+          </div>
+        )}
+      </div>
+
       {userLoading ? (
         <div className="container py-8">
           <Skeleton className="h-8 w-1/2 mb-6" />
@@ -108,36 +138,6 @@ export default function EventsPage() {
             </Card>
         </div>
       )}
-      
-      <div className="mt-8">
-         <h2 className="text-3xl font-bold font-headline mb-6">Upcoming Events</h2>
-        {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {[...Array(8)].map((_, i) => (
-                <div key={i} className="flex flex-col space-y-3">
-                    <Skeleton className="h-[180px] w-full rounded-xl" />
-                    <div className="space-y-2">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    </div>
-                </div>
-                ))}
-            </div>
-        ) : filteredEvents && filteredEvents.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredEvents.map((event) => (
-                    <EventCard key={event.id} event={event} />
-                ))}
-            </div>
-        ) : (
-            <div className="col-span-full text-center py-20 text-muted-foreground">
-                <h2 className="text-2xl font-semibold">No Events Found</h2>
-                <p>
-                There are currently no events in the &quot;{selectedCategory}&quot; category.
-                </p>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
