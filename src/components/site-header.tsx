@@ -16,7 +16,7 @@ export function SiteHeader() {
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex h-16 items-center justify-between">
             {/* Left Section */}
-            <div className="flex items-center justify-start gap-2" style={{ flex: 1 }}>
+            <div className="flex items-center justify-start">
               <Link href="/">
                 <Button variant="ghost" size="icon" className="hover:bg-primary/90 dark:hover:bg-white/10">
                   <Home className="h-5 w-5" />
@@ -27,19 +27,19 @@ export function SiteHeader() {
             </div>
 
             {/* Center Section */}
-            <div className="flex justify-center" style={{ flex: 1 }}>
-                 <MainNav />
+            <div className="flex flex-1 justify-center">
+              <MainNav />
             </div>
             
             {/* Right Section */}
-            <div className="flex items-center justify-end gap-2" style={{ flex: 1 }}>
+            <div className="flex items-center justify-end">
+                <UserNav />
                 <Link href="/events/create">
                     <Button variant="ghost" size="icon" className="hover:bg-primary/90 dark:hover:bg-white/10">
                         <PlusSquare className="h-5 w-5" />
                         <span className="sr-only">Create Event</span>
                     </Button>
                 </Link>
-                <UserNav />
             </div>
           </div>
           <ScrollBar orientation="horizontal" className="invisible" />
