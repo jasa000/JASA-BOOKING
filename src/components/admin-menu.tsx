@@ -52,49 +52,49 @@ export function AdminMenu() {
             <Menubar className="border-none rounded-none p-0 h-auto bg-transparent">
               <MenubarMenu>
                 <Link href="/admin">
-                  <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
+                  <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-gray-700">
                     Admin Dashboard
                   </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/">
-                  <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
+                  <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-gray-700">
                     User Dashboard
                   </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/admin/pending-events">
-                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-gray-700">
                         Pending Events
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/admin/users">
-                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-gray-700">
                         Manage Users
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/admin/categories">
-                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-gray-700">
                         Categories
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
               <MenubarMenu>
                 <Link href="/admin/institution">
-                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-gray-700">
                         INSTITUTION
                     </MenubarTrigger>
                 </Link>
               </MenubarMenu>
                <MenubarMenu>
                 <Link href="/admin/photos">
-                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-white/10">
+                    <MenubarTrigger className="cursor-pointer hover:bg-primary/90 dark:hover:bg-gray-700">
                         Manage Photos
                     </MenubarTrigger>
                 </Link>
