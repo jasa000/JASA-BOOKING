@@ -20,7 +20,7 @@ export function MainNav({
         <span className="font-bold font-headline text-lg tracking-widest leading-none">
           JASA
         </span>
-        <span className="font-bold font-headline text-sm leading-none">
+        <span className="font-headline text-sm leading-none">
           BOOKING
         </span>
       </Link>
