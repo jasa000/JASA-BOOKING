@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/menubar';
 import Link from 'next/link';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
+import { AppearanceMenu } from './appearance-menu';
 
 export function AdminMenu() {
   const { user, loading } = useUser();
@@ -44,7 +45,7 @@ export function AdminMenu() {
   return (
     <div className="sticky top-16 z-30 border-b bg-primary text-primary-foreground">
       <ScrollArea className="w-full whitespace-nowrap">
-        <div className="container flex h-12 items-center px-4 md:px-6">
+        <div className="container flex h-12 items-center justify-between px-4 md:px-6">
             <Menubar className="border-none rounded-none p-0 h-auto bg-transparent">
               <MenubarMenu>
                 <Link href="/admin">
@@ -96,6 +97,7 @@ export function AdminMenu() {
                 </Link>
               </MenubarMenu>
             </Menubar>
+            <AppearanceMenu />
         </div>
          <ScrollBar orientation="horizontal" className="invisible" />
       </ScrollArea>

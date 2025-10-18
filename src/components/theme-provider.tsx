@@ -4,7 +4,7 @@
 import * as React from "react"
 
 export type Theme = "light" | "dark" | "system";
-export type ColorTheme = "zinc" | "blue" | "green" | "rose";
+export type ColorTheme = "zinc" | "red" | "blue" | "green" | "rose";
 
 type ThemeProviderProps = {
   children: React.ReactNode
@@ -33,7 +33,7 @@ const ThemeProviderContext = React.createContext<ThemeProviderState>(initialStat
 export function ThemeProvider({
   children,
   defaultTheme = "system",
-  defaultColorTheme = "zinc",
+  defaultColorTheme = "red",
   storageKey = "ui-theme",
   colorStorageKey = "ui-color-theme",
   ...props
@@ -67,12 +67,17 @@ export function ThemeProvider({
     }
 
     // remove previous color theme classes
-    const themes: ColorTheme[] = ["zinc", "blue", "green", "rose"];
+    const themes: ColorTheme[] = ["zinc", "red", "blue", "green", "rose"];
     themes.forEach(t => root.classList.remove(`theme-${t}`));
 
     if (colorTheme !== "zinc") {
       root.classList.add(`theme-${colorTheme}`);
+    } else {
+       if (theme !== 'dark') {
+         root.classList.remove('theme-red');
+       }
     }
+
 
   }, [theme, colorTheme])
 
