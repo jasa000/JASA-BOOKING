@@ -62,9 +62,14 @@ export default function EventsPage() {
     <div className="container mx-auto px-4 py-8">
       <WelcomeBanner />
       
-       <div className="sticky top-16 z-30 bg-primary/95 text-primary-foreground backdrop-blur-sm -mx-4 border-b">
-         <div className='container py-4'>
-            <CategoryFilter selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+       <div className="sticky top-16 z-30 backdrop-blur-sm -mx-4 border-b">
+         <div className='container pt-4 bg-background'>
+            <h3 className="text-lg font-semibold mb-2 font-headline">Browse by Category</h3>
+         </div>
+         <div className='bg-primary text-primary-foreground'>
+            <div className='container py-2'>
+                <CategoryFilter selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+            </div>
          </div>
       </div>
       

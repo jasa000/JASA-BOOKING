@@ -55,7 +55,6 @@ export function CategoryFilter({
 
   return (
     <div>
-        <h3 className="text-lg font-semibold mb-2 font-headline">Browse by Category</h3>
         <ScrollArea className="w-full whitespace-nowrap">
         <div className="h-14 flex items-center gap-2">
             <Button
