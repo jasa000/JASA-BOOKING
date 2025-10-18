@@ -2,14 +2,16 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { NextResponse } from 'next/server';
 
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true,
-});
-
 export async function POST(request: Request) {
+  // Configuration must be done within the request handler
+  // to ensure environment variables are available.
+  cloudinary.config({
+    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+  });
+
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -25,8 +27,7 @@ export async function POST(request: Request) {
     const fileUri = 'data:' + mime + ';' + encoding + ',' + base64Data;
 
     const result = await cloudinary.uploader.upload(fileUri, {
-      folder: 'jasa-booking', // Optional: organize uploads in a folder
-      // public_id: `some_unique_id`, // Optional: specify a public_id
+      folder: 'jasa-booking',
     });
     
     return NextResponse.json({ secure_url: result.secure_url });
