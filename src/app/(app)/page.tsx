@@ -62,7 +62,7 @@ export default function EventsPage() {
     <div className="container mx-auto px-4 py-8">
       <WelcomeBanner />
       
-       <div className="sticky top-16 z-30 backdrop-blur-sm -mx-4 border-b">
+       <div className="border-b">
          <div className='container pt-4 bg-background'>
             <h3 className="text-lg font-semibold mb-2 font-headline">Browse by Category</h3>
          </div>
