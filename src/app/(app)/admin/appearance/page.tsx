@@ -24,7 +24,9 @@ export default function AppearancePage() {
         setColorTheme, 
         defaultTheme, 
         setDefaultTheme,
-        settingsLoading 
+        settingsLoading,
+        previewColorTheme,
+        setPreviewColorTheme
     } = useTheme();
 
     const [selectedColorTheme, setSelectedColorTheme] = useState<ColorTheme>(colorTheme);
@@ -32,16 +34,23 @@ export default function AppearancePage() {
 
     const { toast } = useToast();
 
-    // This effect ensures the local state is updated when the global theme loads from DB
+    // Sync local state when global theme loads from DB or changes
     useEffect(() => {
         if (!settingsLoading) {
             setSelectedColorTheme(colorTheme);
             setSelectedDefaultTheme(defaultTheme);
         }
     }, [colorTheme, defaultTheme, settingsLoading]);
+
+    // Handle previewing the theme
+    const handleSelectColorTheme = (theme: ColorTheme) => {
+        setSelectedColorTheme(theme);
+        setPreviewColorTheme(theme);
+    };
     
     const handleSaveColor = () => {
         setColorTheme(selectedColorTheme);
+        setPreviewColorTheme(null); // Clear preview on save
         toast({
             title: "Color Theme Saved",
             description: "Your new color theme has been applied application-wide.",
@@ -58,14 +67,21 @@ export default function AppearancePage() {
         }
     };
 
-
     const handleCancelColor = () => {
         setSelectedColorTheme(colorTheme);
+        setPreviewColorTheme(null); // Clear preview on cancel
     };
     
     const handleCancelDefaultTheme = () => {
         setSelectedDefaultTheme(defaultTheme);
     }
+
+    // Clear preview if user navigates away
+    useEffect(() => {
+        return () => {
+            setPreviewColorTheme(null);
+        };
+    }, [setPreviewColorTheme]);
 
     const hasColorChanges = selectedColorTheme !== colorTheme;
     const hasThemeChanges = selectedDefaultTheme !== defaultTheme;
@@ -113,7 +129,7 @@ export default function AppearancePage() {
                         <CardDescription>Select a color palette for the UI (light mode only).</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <ThemeSelector selectedTheme={selectedColorTheme} onSelectTheme={setSelectedColorTheme} />
+                        <ThemeSelector selectedTheme={selectedColorTheme} onSelectTheme={handleSelectColorTheme} />
                     </CardContent>
                     <CardFooter className="flex justify-end gap-2">
                          {hasColorChanges && (

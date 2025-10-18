@@ -6,16 +6,19 @@ import { useTheme } from './theme-provider';
 import { cn } from '@/lib/utils';
 
 export function ThemeWrapper({ children }: { children: React.ReactNode }) {
-  const { colorTheme, settingsLoading } = useTheme();
+  const { colorTheme, settingsLoading, previewColorTheme } = useTheme();
 
   useEffect(() => {
-    // Wait until settings are loaded to prevent flashes or incorrect initial themes.
+    // Determine the active theme: preview takes precedence over saved theme.
+    const activeTheme = previewColorTheme || colorTheme;
+    
+    // Don't apply themes until settings are loaded to avoid flashes.
     if (settingsLoading) {
       return;
     }
 
     const body = document.body;
-
+    
     // Remove any existing theme-` classes to ensure a clean slate.
     body.classList.forEach(className => {
       if (className.startsWith('theme-')) {
@@ -23,12 +26,10 @@ export function ThemeWrapper({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Add the new theme class if it's not the default 'zinc' theme.
-    // The default 'zinc' styles are applied via globals.css, so no class is needed for it.
-    if (colorTheme !== 'zinc') {
-      body.classList.add(`theme-${colorTheme}`);
-    }
-  }, [colorTheme, settingsLoading]);
+    // Add the new theme class.
+    body.classList.add(`theme-${activeTheme}`);
+    
+  }, [colorTheme, settingsLoading, previewColorTheme]);
   
   return (
     <div

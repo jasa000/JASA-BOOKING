@@ -3,9 +3,9 @@
 
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from "next-themes";
-import type { ThemeProviderProps as NextThemesProviderProps } from "next-themes/dist/types";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc, setDoc } from "firebase/firestore";
+import { useCallback } from "react";
 
 export type Theme = "light" | "dark" | "system";
 export type ColorTheme = "zinc" | "red" | "royal-blue" | "light-blue" | "royal-green";
@@ -23,6 +23,8 @@ type CustomThemeContextType = {
   defaultTheme: Theme;
   setDefaultTheme: (theme: Theme) => void;
   settingsLoading: boolean;
+  previewColorTheme: ColorTheme | null;
+  setPreviewColorTheme: (theme: ColorTheme | null) => void;
 }
 
 const initialThemeState: CustomThemeContextType = {
@@ -33,25 +35,15 @@ const initialThemeState: CustomThemeContextType = {
   defaultTheme: "system",
   setDefaultTheme: () => null,
   settingsLoading: true,
+  previewColorTheme: null,
+  setPreviewColorTheme: () => null,
 }
 
 const CustomThemeContext = React.createContext<CustomThemeContextType>(initialThemeState);
 
-
-export function ThemeProvider({ children }: NextThemesProviderProps) {
-  return <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-     <CustomThemeProvider>{children}</CustomThemeProvider>
-    </NextThemesProvider>
-}
-
-function CustomThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const firestore = useFirestore();
-    const { theme, setTheme } = useNextTheme();
+    const { theme, setTheme: setNextTheme } = useNextTheme();
 
     const settingsDocRef = React.useMemo(() => {
         if (!firestore) return null;
@@ -60,27 +52,37 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
 
     const { data: appSettings, loading: settingsLoading } = useDoc<AppSettings>(settingsDocRef);
     
+    const [previewColorTheme, setPreviewColorTheme] = React.useState<ColorTheme | null>(null);
+    
     const colorTheme = appSettings?.colorTheme || "zinc";
     const defaultTheme = appSettings?.defaultTheme || "system";
 
-    const setColorTheme = React.useCallback((newColorTheme: ColorTheme) => {
+    const setColorTheme = useCallback((newColorTheme: ColorTheme) => {
       if (settingsDocRef) {
           setDoc(settingsDocRef, { colorTheme: newColorTheme }, { merge: true });
       }
     }, [settingsDocRef]);
 
-    const setDefaultTheme = React.useCallback((newDefaultTheme: Theme) => {
+    const setDefaultTheme = useCallback((newDefaultTheme: Theme) => {
         if (settingsDocRef) {
             setDoc(settingsDocRef, { defaultTheme: newDefaultTheme }, { merge: true });
         }
     }, [settingsDocRef]);
+    
+    const setTheme = useCallback((newTheme: Theme) => {
+        setNextTheme(newTheme);
+        localStorage.setItem("theme", newTheme);
+    }, [setNextTheme]);
+
 
     React.useEffect(() => {
       const storedTheme = localStorage.getItem("theme");
       if (!storedTheme && !settingsLoading && defaultTheme) {
-        setTheme(defaultTheme);
+        setNextTheme(defaultTheme);
+      } else if (storedTheme) {
+        setNextTheme(storedTheme as Theme);
       }
-    }, [defaultTheme, settingsLoading, setTheme]);
+    }, [defaultTheme, settingsLoading, setNextTheme]);
 
     const value = {
         theme: (theme as Theme) || 'system',
@@ -90,6 +92,8 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
         defaultTheme,
         setDefaultTheme,
         settingsLoading,
+        previewColorTheme,
+        setPreviewColorTheme,
     };
 
     return (
@@ -98,7 +102,6 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
         </CustomThemeContext.Provider>
     );
 }
-
 
 export const useTheme = () => {
   const context = React.useContext(CustomThemeContext);
@@ -109,3 +112,6 @@ export const useTheme = () => {
 
   return context;
 };
+
+// Re-export NextThemesProvider to wrap it in layout
+export { NextThemesProvider };
