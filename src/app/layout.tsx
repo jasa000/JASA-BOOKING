@@ -24,8 +24,9 @@ function AppBody({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Add the new theme class if it's not the default
-    if (activeTheme && activeTheme !== 'zinc') {
+    // Add the new theme class. This logic is now simplified to always
+    // apply the active theme, fixing the bug where it was stuck on zinc.
+    if (activeTheme) {
       body.classList.add(`theme-${activeTheme}`);
     }
   }, [colorTheme, previewColorTheme]);
