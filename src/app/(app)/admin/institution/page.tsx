@@ -79,8 +79,8 @@ const institutionFormSchema = z.object({
   state: z.string().min(1, 'Please select a state.'),
   district: z.string().min(1, 'Please select a district.'),
   address: z.string().min(10, 'Please provide a detailed address.'),
-  imageUrls: z.array(z.string().url()).min(1, 'Please upload at least one image.'),
-  mainImageUrl: z.string().url().min(1, 'Please select a main image.'),
+  imageUrls: z.array(z.string()).min(1, 'Please upload at least one image.'),
+  mainImageUrl: z.string().min(1, 'Please select a main image.'),
 });
 
 export default function InstitutionsPage() {
@@ -93,6 +93,7 @@ export default function InstitutionsPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   
   const form = useForm<z.infer<typeof institutionFormSchema>>({
     resolver: zodResolver(institutionFormSchema),
@@ -104,6 +105,7 @@ export default function InstitutionsPage() {
       imageUrls: [],
       mainImageUrl: '',
     },
+    mode: 'onChange',
   });
   
   const selectedState = form.watch('state');
@@ -189,9 +191,11 @@ export default function InstitutionsPage() {
     form.setValue('mainImageUrl', url, { shouldValidate: true });
   };
   
-  async function performSubmit(values: z.infer<typeof institutionFormSchema>) {
+  async function performSubmit() {
     if (!firestore) return;
+    const values = form.getValues();
     setIsSubmitting(true);
+    setIsConfirmOpen(false);
   
     try {
       setIsUploading(true);
@@ -224,8 +228,11 @@ export default function InstitutionsPage() {
       let finalMainImageUrl = values.mainImageUrl;
       if (values.mainImageUrl.startsWith('blob:')) {
         const blobIndex = imagePreviews.filter(p => p.startsWith('blob:')).indexOf(values.mainImageUrl);
-        const correspondingUploadedUrl = uploadedUrls[blobIndex];
-        finalMainImageUrl = correspondingUploadedUrl || finalImageUrls[0];
+        if (blobIndex !== -1 && uploadedUrls[blobIndex]) {
+            finalMainImageUrl = uploadedUrls[blobIndex];
+        } else {
+            finalMainImageUrl = finalImageUrls[0];
+        }
       } else if (!finalImageUrls.includes(values.mainImageUrl)) {
         finalMainImageUrl = finalImageUrls[0];
       }
@@ -259,8 +266,8 @@ export default function InstitutionsPage() {
     }
   }
 
-  const onSubmit = (values: z.infer<typeof institutionFormSchema>) => {
-    // This function will now only trigger the dialog
+  const onSubmit = () => {
+    setIsConfirmOpen(true);
   };
 
   const handleDelete = async (institutionId: string) => {
@@ -409,27 +416,25 @@ export default function InstitutionsPage() {
                 )} />
 
                 <div className="flex gap-2">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                       <Button type="button" disabled={isSubmitting || isUploading || !form.formState.isValid}>
-                        {isSubmitting ? (editingInstitution ? 'Updating...' : 'Adding...') : (editingInstitution ? 'Update Institution' : 'Add Institution')}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                       <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will {editingInstitution ? 'update the' : 'create a new'} institution.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => performSubmit(form.getValues())}>
-                          Confirm
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                    <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+                        <Button type="submit" disabled={isSubmitting || isUploading || !form.formState.isValid}>
+                            {isSubmitting ? (editingInstitution ? 'Updating...' : 'Adding...') : (editingInstitution ? 'Update Institution' : 'Add Institution')}
+                        </Button>
+                        <AlertDialogContent>
+                           <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will {editingInstitution ? 'update the' : 'create a new'} institution.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={performSubmit}>
+                              Confirm
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
 
                   {editingInstitution && (
                     <Button variant="outline" type="button" onClick={handleCancelEdit}>Cancel</Button>
