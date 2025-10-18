@@ -170,7 +170,7 @@ export default function LoginPage() {
               </Button>
             </div>
           </div>
-          <Button type="submit" className="w-full" disabled={isSubmitting || isGoogleSubmitting}>
+          <Button type="submit" className="w-full" variant="secondary" disabled={isSubmitting || isGoogleSubmitting}>
              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Login
           </Button>
