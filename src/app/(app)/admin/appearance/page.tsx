@@ -7,15 +7,38 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { ThemeSelector } from '@/components/theme-selector';
-import { useTheme } from '@/components/theme-provider';
+import { useTheme, type ColorTheme } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import React, { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AppearancePage() {
-    const { theme, setTheme } = useTheme();
+    const { theme, setTheme, colorTheme, setColorTheme } = useTheme();
+    const [selectedColorTheme, setSelectedColorTheme] = useState<ColorTheme>(colorTheme);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        setSelectedColorTheme(colorTheme);
+    }, [colorTheme]);
+
+    const handleSave = () => {
+        setColorTheme(selectedColorTheme);
+        toast({
+            title: "Theme Saved",
+            description: "Your new color theme has been applied.",
+        });
+    };
+
+    const handleCancel = () => {
+        setSelectedColorTheme(colorTheme);
+    };
+
+    const hasChanges = selectedColorTheme !== colorTheme;
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -30,11 +53,19 @@ export default function AppearancePage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Color Theme</CardTitle>
-                        <CardDescription>Select a color palette for the UI.</CardDescription>
+                        <CardDescription>Select a color palette for the UI (light mode only).</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <ThemeSelector />
+                        <ThemeSelector selectedTheme={selectedColorTheme} onSelectTheme={setSelectedColorTheme} />
                     </CardContent>
+                    <CardFooter className="flex justify-end gap-2">
+                         {hasChanges && (
+                            <Button variant="ghost" onClick={handleCancel}>Cancel</Button>
+                         )}
+                        <Button onClick={handleSave} disabled={!hasChanges}>
+                            Save
+                        </Button>
+                    </CardFooter>
                 </Card>
                 <Card>
                     <CardHeader>

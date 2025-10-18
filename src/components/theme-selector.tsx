@@ -1,12 +1,16 @@
 
 "use client";
 
-import { useTheme, type ColorTheme } from "@/components/theme-provider";
+import { ColorTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
-export function ThemeSelector() {
-  const { colorTheme, setColorTheme } = useTheme();
+interface ThemeSelectorProps {
+  selectedTheme: ColorTheme;
+  onSelectTheme: (theme: ColorTheme) => void;
+}
+
+export function ThemeSelector({ selectedTheme, onSelectTheme }: ThemeSelectorProps) {
 
   const themes: { name: ColorTheme; color: string }[] = [
     { name: "zinc", color: "#71717A" },
@@ -21,10 +25,10 @@ export function ThemeSelector() {
       {themes.map((theme) => (
         <div key={theme.name}>
           <button
-            onClick={() => setColorTheme(theme.name)}
+            onClick={() => onSelectTheme(theme.name)}
             className={cn(
               "flex w-full items-center justify-center rounded-md border-2 p-1",
-              colorTheme === theme.name ? "border-primary" : "border-transparent"
+              selectedTheme === theme.name ? "border-primary" : "border-transparent"
             )}
             style={{ backgroundColor: theme.name === 'zinc' ? 'hsl(var(--muted))' : ''}}
           >
@@ -37,7 +41,7 @@ export function ThemeSelector() {
                 <span className="text-sm font-medium capitalize">
                   {theme.name}
                 </span>
-                {colorTheme === theme.name && <Check className="h-4 w-4 text-primary" />}
+                {selectedTheme === theme.name && <Check className="h-4 w-4 text-primary" />}
               </div>
             </div>
           </button>
