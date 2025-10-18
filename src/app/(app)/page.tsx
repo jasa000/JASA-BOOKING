@@ -65,9 +65,11 @@ export default function EventsPage() {
       </div>
       
        <div className="border-b py-8">
-         <h2 className="text-3xl font-bold font-headline mb-6 text-center">Browse by Category</h2>
+        <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold font-headline mb-6 text-center">Browse by Category</h2>
+        </div>
          <div className='bg-primary text-primary-foreground'>
-            <div className='px-4 md:px-6 py-2'>
+            <div className='container mx-auto px-4'>
                 <CategoryFilter selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
             </div>
          </div>
@@ -120,7 +122,7 @@ export default function EventsPage() {
         ) : user ? (
           <InstitutionFilter />
         ) : (
-          <div className="text-center">
+          <div className="text-center container mx-auto px-4">
               <h2 className="text-3xl font-bold font-headline mb-6 text-center">Browse by Institution</h2>
               <p className="text-muted-foreground mb-4">
                   This section is only accessible when a user is logged in.

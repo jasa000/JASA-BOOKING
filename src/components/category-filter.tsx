@@ -55,7 +55,7 @@ export function CategoryFilter({
 
   return (
     <div>
-        <ScrollArea className="w-full whitespace-nowrap">
+        <ScrollArea className="w-full whitespace-nowrap py-2">
         <div className="h-14 flex items-center gap-2">
             <Button
                 variant={selectedCategory === 'all' ? 'secondary' : 'ghost'}
