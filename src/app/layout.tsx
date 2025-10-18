@@ -1,14 +1,13 @@
 
 'use client';
 
-import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider, useTheme } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-import React, { useEffect } from 'react';
+import React from 'react';
 
-// This new AppBody component is the key. It's a client component that
+// This AppBody component is the key. It's a client component that
 // can use the useTheme hook and reliably apply classes to the document body.
 function AppBody({ children }: { children: React.ReactNode }) {
   const { colorTheme } = useTheme();
@@ -18,13 +17,12 @@ function AppBody({ children }: { children: React.ReactNode }) {
     const body = document.body;
     
     // Create a new class list by filtering out any existing theme classes.
-    // This is a robust way to ensure a clean slate.
     const newClassList = Array.from(body.classList).filter(
       (cls) => !cls.startsWith('theme-')
     );
 
-    // Add the new theme class if it's not the default.
-    if (colorTheme && colorTheme !== 'zinc') {
+    // If there is a color theme from the DB, and it's not the default red, add its class.
+    if (colorTheme && colorTheme !== 'red') {
       newClassList.push(`theme-${colorTheme}`);
     }
 
