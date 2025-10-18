@@ -20,7 +20,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AppearancePage() {
     const { 
-        theme, 
         colorTheme, 
         setColorTheme, 
         defaultTheme, 

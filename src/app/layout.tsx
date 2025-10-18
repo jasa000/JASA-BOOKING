@@ -25,11 +25,16 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <ThemeProvider>
-            <ThemeWrapper>
-                <FirebaseClientProvider>{children}</FirebaseClientProvider>
-                <Toaster />
-            </ThemeWrapper>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ThemeWrapper>
+            <FirebaseClientProvider>{children}</FirebaseClientProvider>
+            <Toaster />
+          </ThemeWrapper>
         </ThemeProvider>
       </body>
     </html>
