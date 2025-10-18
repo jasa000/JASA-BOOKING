@@ -1,29 +1,23 @@
 
-export const cloudinaryConfig = {
-  cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
-  endpoint: `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-};
-
-export const uploadImage = async (file: File) => {
+export const uploadImage = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("upload_preset", cloudinaryConfig.uploadPreset!);
 
   try {
-    const response = await fetch(cloudinaryConfig.endpoint, {
+    const response = await fetch('/api/upload', {
       method: "POST",
       body: formData,
     });
 
     if (!response.ok) {
-      throw new Error("Image upload failed");
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Image upload failed");
     }
 
     const data = await response.json();
     return data.secure_url;
   } catch (error) {
-    console.error("Error uploading image to Cloudinary:", error);
+    console.error("Error uploading image via local API:", error);
     throw error;
   }
 };
