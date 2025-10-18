@@ -8,6 +8,7 @@ import type { Category } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 interface CategoryFilterProps {
   selectedCategory: string;
@@ -44,33 +45,41 @@ export function CategoryFilter({
     );
   }
 
+  const buttonClasses = (isActive: boolean) => cn(
+      "rounded-full shrink-0",
+      isActive 
+          ? "bg-primary-foreground text-primary hover:bg-primary-foreground/90" 
+          : "bg-primary/80 text-primary-foreground hover:bg-primary"
+  );
+
+
   return (
     <div>
         <h3 className="text-lg font-semibold mb-2 font-headline">Browse by Category</h3>
         <ScrollArea className="w-full whitespace-nowrap">
         <div className="h-14 flex items-center gap-2">
             <Button
-            variant={selectedCategory === 'all' ? 'secondary' : 'ghost'}
-            size="sm"
-            onClick={() => onSelectCategory('all')}
-            className="rounded-full shrink-0"
+                variant={selectedCategory === 'all' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => onSelectCategory('all')}
+                className={buttonClasses(selectedCategory === 'all')}
             >
             All
             </Button>
             {loading ? (
                 [...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-8 w-24 rounded-full" />
+                <Skeleton key={i} className="h-8 w-24 rounded-full bg-white/20" />
             ))
             ) : (
             categories?.map((category) => (
                 <Button
-                key={category.id}
-                variant={
-                    selectedCategory === category.name ? 'secondary' : 'ghost'
-                }
-                size="sm"
-                onClick={() => onSelectCategory(category.name)}
-                className="rounded-full shrink-0"
+                    key={category.id}
+                    variant={
+                        selectedCategory === category.name ? 'secondary' : 'ghost'
+                    }
+                    size="sm"
+                    onClick={() => onSelectCategory(category.name)}
+                    className={buttonClasses(selectedCategory === category.name)}
                 >
                 {category.name}
                 </Button>

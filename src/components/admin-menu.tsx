@@ -42,10 +42,10 @@ export function AdminMenu() {
   }
 
   return (
-    <div className="border-b bg-background">
+    <div className="border-b bg-secondary">
       <ScrollArea className="w-full whitespace-nowrap">
         <div className="flex h-12 items-center px-4 md:px-6">
-            <Menubar className="border-none rounded-none p-0 h-auto">
+            <Menubar className="border-none rounded-none p-0 h-auto bg-transparent">
               <MenubarMenu>
                 <Link href="/admin">
                   <MenubarTrigger className="cursor-pointer">
