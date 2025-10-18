@@ -22,7 +22,7 @@ export function SiteHeader() {
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <Link href="/events/create" passHref>
+           <Link href="/events/create" passHref>
             <Button variant="ghost" size="icon">
               <Plus className="h-5 w-5" />
               <span className="sr-only">Create Event</span>
