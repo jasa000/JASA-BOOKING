@@ -14,21 +14,19 @@ export function SiteHeader() {
   return (
     <header className={cn(
         "sticky top-0 z-40 w-full border-b",
-        theme === 'light' 
-            ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-            : "dark:bg-black"
+        "bg-background"
     )}>
       <div className="relative flex h-16 items-center px-4 md:px-6">
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <MainNav />
         </div>
 
-        <div className="flex flex-1 items-center justify-end space-x-4">
-          <Link href="/events/create">
-              <Button variant="ghost">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Post
-              </Button>
+        <div className="flex flex-1 items-center justify-end space-x-2">
+          <Link href="/events/create" passHref>
+            <Button variant="ghost" size="icon">
+              <Plus className="h-5 w-5" />
+              <span className="sr-only">Create Event</span>
+            </Button>
           </Link>
           <UserNav />
         </div>
