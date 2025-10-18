@@ -6,7 +6,8 @@ import { doc, setDoc } from "firebase/firestore";
 import * as React from "react"
 
 export type Theme = "light" | "dark" | "system";
-export type ColorTheme = "zinc" | "red" | "blue" | "green" | "rose";
+export type ColorTheme = "zinc" | "red" | "royal-blue" | "light-blue" | "royal-green";
+
 
 type ThemeProviderProps = {
   children: React.ReactNode
@@ -77,15 +78,12 @@ export function ThemeProvider({
     }
     root.classList.add(effectiveTheme);
 
-
-    // remove previous color theme classes
-    const themes: ColorTheme[] = ["zinc", "red", "blue", "green", "rose"];
+    const themes: ColorTheme[] = ["zinc", "red", "royal-blue", "light-blue", "royal-green"];
     const body = window.document.body;
     const previewTheme = body.dataset.previewTheme as ColorTheme | undefined;
 
     themes.forEach(t => root.classList.remove(`theme-${t}`));
 
-    // Only apply color theme if in light mode
     if (effectiveTheme === 'light') {
         const themeToApply = previewTheme || colorTheme;
         if (themeToApply !== "zinc") {

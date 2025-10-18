@@ -130,7 +130,7 @@
         "colorTheme": {
           "type": "string",
           "description": "The active color theme for the application.",
-          "enum": ["zinc", "red", "blue", "green", "rose"]
+          "enum": ["zinc", "red", "royal-blue", "light-blue", "royal-green"]
         }
       }
     }

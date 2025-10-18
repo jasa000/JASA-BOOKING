@@ -12,16 +12,16 @@ interface ThemeSelectorProps {
 
 export function ThemeSelector({ selectedTheme, onSelectTheme }: ThemeSelectorProps) {
 
-  const themes: { name: ColorTheme; color: string }[] = [
-    { name: "zinc", color: "#71717A" },
-    { name: "red", color: "#DC2626" },
-    { name: "blue", color: "#3B82F6" },
-    { name: "green", color: "#22C55E" },
-    { name: "rose", color: "#F43F5E" },
+  const themes: { name: ColorTheme; label: string; color: string }[] = [
+    { name: "zinc", label: "Zinc", color: "#71717A" },
+    { name: "red", label: "Red", color: "#DC2626" },
+    { name: "royal-blue", label: "Royal Blue", color: "#3B82F6" },
+    { name: "light-blue", label: "Light Blue", color: "#60A5FA" },
+    { name: "royal-green", label: "Royal Green", color: "#16A34A" },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
       {themes.map((theme) => (
         <div key={theme.name}>
           <button
@@ -39,7 +39,7 @@ export function ThemeSelector({ selectedTheme, onSelectTheme }: ThemeSelectorPro
               />
               <div className="flex items-center space-x-1">
                 <span className="text-sm font-medium capitalize">
-                  {theme.name}
+                  {theme.label}
                 </span>
                 {selectedTheme === theme.name && <Check className="h-4 w-4 text-primary" />}
               </div>
