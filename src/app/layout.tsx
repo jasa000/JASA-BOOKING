@@ -14,27 +14,25 @@ function AppBody({ children }: { children: React.ReactNode }) {
   const { colorTheme } = useTheme();
 
   // This logic now runs on every render on the client, ensuring the class is always correct.
-  // We avoid useEffect to prevent race conditions with theme state loading.
   if (typeof window !== 'undefined') {
     const body = document.body;
     
-    // Create a copy of the class list to safely iterate over while modifying it.
-    const classesToRemove = [];
-    for (const cls of body.classList) {
-        if (cls.startsWith('theme-')) {
-            classesToRemove.push(cls);
-        }
-    }
-    
-    if (classesToRemove.length > 0) {
-      body.classList.remove(...classesToRemove);
+    // Create a new class list by filtering out any existing theme classes.
+    // This is a robust way to ensure a clean slate.
+    const newClassList = Array.from(body.classList).filter(
+      (cls) => !cls.startsWith('theme-')
+    );
+
+    // Add the new theme class if it's not the default.
+    if (colorTheme && colorTheme !== 'zinc') {
+      newClassList.push(`theme-${colorTheme}`);
     }
 
-    // Add the new theme class, but not for zinc which is the default.
-    if (colorTheme && colorTheme !== 'zinc') {
-      body.classList.add(`theme-${colorTheme}`);
-    }
+    // Set the className property directly. This is an atomic operation and more
+    // reliable than adding/removing individual classes in a loop.
+    body.className = newClassList.join(' ');
   }
+
 
   return <>{children}</>;
 }
