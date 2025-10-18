@@ -1,6 +1,8 @@
 
 "use client"
 
+import { useDoc, useFirestore } from "@/firebase";
+import { doc, setDoc } from "firebase/firestore";
 import * as React from "react"
 
 export type Theme = "light" | "dark" | "system";
@@ -11,7 +13,6 @@ type ThemeProviderProps = {
   defaultTheme?: Theme
   defaultColorTheme?: ColorTheme
   storageKey?: string
-  colorStorageKey?: string
 }
 
 type ThemeProviderState = {
@@ -30,31 +31,42 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = React.createContext<ThemeProviderState>(initialState)
 
+
+type AppSettings = {
+    colorTheme?: ColorTheme;
+}
+
 export function ThemeProvider({
   children,
   defaultTheme = "light",
   defaultColorTheme = "red",
   storageKey = "ui-theme",
-  colorStorageKey = "ui-color-theme",
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = React.useState<Theme>(defaultTheme);
-  const [colorTheme, setColorTheme] = React.useState<ColorTheme>(defaultColorTheme);
+  const firestore = useFirestore();
+
+  const settingsDocRef = React.useMemo(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'settings', 'app-config');
+  }, [firestore]);
+
+  const { data: appSettings, loading: settingsLoading } = useDoc<AppSettings>(settingsDocRef);
+  
+  const colorTheme = React.useMemo(() => appSettings?.colorTheme || defaultColorTheme, [appSettings, defaultColorTheme]);
+
 
   React.useEffect(() => {
     const storedTheme = localStorage.getItem(storageKey) as Theme | null;
-    const storedColorTheme = localStorage.getItem(colorStorageKey) as ColorTheme | null;
-    
     if (storedTheme) {
       setTheme(storedTheme);
     }
-    if (storedColorTheme) {
-      setColorTheme(storedColorTheme);
-    }
-  }, [storageKey, colorStorageKey]);
+  }, [storageKey]);
   
 
   React.useEffect(() => {
+    if (settingsLoading) return;
+
     const root = window.document.documentElement
     
     root.classList.remove("light", "dark");
@@ -80,7 +92,7 @@ export function ThemeProvider({
             root.classList.add(`theme-${themeToApply}`);
         }
     }
-  }, [theme, colorTheme])
+  }, [theme, colorTheme, settingsLoading])
 
   const value = {
     theme,
@@ -92,10 +104,9 @@ export function ThemeProvider({
     },
     colorTheme,
     setColorTheme: (newColorTheme: ColorTheme) => {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(colorStorageKey, newColorTheme)
-      }
-      setColorTheme(newColorTheme)
+        if (settingsDocRef) {
+            setDoc(settingsDocRef, { colorTheme: newColorTheme }, { merge: true });
+        }
     },
   }
 
