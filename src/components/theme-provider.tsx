@@ -4,17 +4,11 @@
 import { useDoc, useFirestore } from "@/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import * as React from "react"
+import { useTheme as useNextTheme } from "next-themes";
 
 export type Theme = "light" | "dark" | "system";
 export type ColorTheme = "zinc" | "red" | "royal-blue" | "light-blue" | "royal-green";
 
-
-type ThemeProviderProps = {
-  children: React.ReactNode
-  defaultTheme?: Theme
-  defaultColorTheme?: ColorTheme
-  storageKey?: string
-}
 
 type ThemeProviderState = {
   theme: Theme;
@@ -36,7 +30,7 @@ const initialState: ThemeProviderState = {
   settingsLoading: true,
 }
 
-const ThemeProviderContext = React.createContext<ThemeProviderState>(initialState)
+const CustomThemeContext = React.createContext<ThemeProviderState>(initialState)
 
 
 type AppSettings = {
@@ -44,16 +38,14 @@ type AppSettings = {
     defaultTheme?: Theme;
 }
 
-export function ThemeProvider({
-  children,
-  defaultTheme: fallbackTheme = "system",
-  defaultColorTheme = "zinc",
-  storageKey = "ui-theme",
-  ...props
-}: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(() => (typeof window !== 'undefined' ? localStorage.getItem(storageKey) as Theme : null) || fallbackTheme);
+export function ThemeProvider({ children, ...props }: React.ComponentProps<typeof import("next-themes").ThemeProvider>) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+}
 
+
+function NextThemesProvider({ children, ...props }: React.ComponentProps<typeof import("next-themes").ThemeProvider>) {
   const firestore = useFirestore();
+  const { theme, setTheme } = useNextTheme();
   
   const settingsDocRef = React.useMemo(() => {
     if (!firestore) return null;
@@ -62,52 +54,32 @@ export function ThemeProvider({
 
   const { data: appSettings, loading: settingsLoading } = useDoc<AppSettings>(settingsDocRef);
   
-  const colorTheme = React.useMemo(() => appSettings?.colorTheme || defaultColorTheme, [appSettings, defaultColorTheme]);
-  const defaultTheme = React.useMemo(() => appSettings?.defaultTheme || fallbackTheme, [appSettings, fallbackTheme]);
+  const colorTheme = React.useMemo(() => appSettings?.colorTheme || "zinc", [appSettings]);
+  const defaultTheme = React.useMemo(() => appSettings?.defaultTheme || "system", [appSettings]);
 
   React.useEffect(() => {
-    const storedTheme = localStorage.getItem(storageKey) as Theme | null
-    // If there's a theme in local storage, use it. Otherwise, use the default from the database.
-    if (storedTheme) {
-        setTheme(storedTheme)
-    } else if (!settingsLoading) {
-        setTheme(defaultTheme);
+    const storedTheme = localStorage.getItem("ui-theme") as Theme | null
+    if (!storedTheme && !settingsLoading) {
+      setTheme(defaultTheme);
     }
-  }, [storageKey, defaultTheme, settingsLoading]);
-  
+  }, [defaultTheme, settingsLoading, setTheme]);
 
-  React.useEffect(() => {
-    if (settingsLoading) return;
+   React.useEffect(() => {
+    const body = document.body;
+    const themes = ["zinc", "red", "royal-blue", "light-blue", "royal-green"];
+    
+    body.classList.remove(...themes.map(t => `theme-${t}`));
 
-    const root = window.document.documentElement
-    
-    root.classList.remove("light", "dark");
-    
-    let effectiveTheme = theme;
-    if (theme === "system") {
-        effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+    if (!settingsLoading && colorTheme && colorTheme !== 'zinc') {
+      body.classList.add(`theme-${colorTheme}`);
     }
-    root.classList.add(effectiveTheme);
+  }, [colorTheme, settingsLoading]);
 
-    const themes: ColorTheme[] = ["zinc", "red", "royal-blue", "light-blue", "royal-green"];
-    const body = window.document.body;
-    const previewTheme = body.dataset.previewTheme as ColorTheme | undefined;
-
-    themes.forEach(t => body.classList.remove(`theme-${t}`));
-    
-    if (effectiveTheme === 'light') {
-        const themeToApply = previewTheme || colorTheme;
-        if (themeToApply && themeToApply !== "zinc") {
-            body.classList.add(`theme-${themeToApply}`);
-        }
-    }
-  }, [theme, colorTheme, settingsLoading])
 
   const value = {
-    theme,
+    theme: (theme as Theme) || 'system',
     setTheme: (newTheme: Theme) => {
-      localStorage.setItem(storageKey, newTheme)
-      setTheme(newTheme)
+      setTheme(newTheme);
     },
     colorTheme,
     setColorTheme: (newColorTheme: ColorTheme) => {
@@ -125,14 +97,14 @@ export function ThemeProvider({
   }
 
   return (
-    <ThemeProviderContext.Provider {...props} value={value}>
+    <CustomThemeContext.Provider value={value}>
       {children}
-    </ThemeProviderContext.Provider>
+    </CustomThemeContext.Provider>
   )
 }
 
 export const useTheme = () => {
-  const context = React.useContext(ThemeProviderContext)
+  const context = React.useContext(CustomThemeContext)
 
   if (context === undefined)
     throw new Error("useTheme must be used within a ThemeProvider")
