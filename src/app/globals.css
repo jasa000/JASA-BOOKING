@@ -30,14 +30,14 @@
   }
 
   .dark {
-    --background: 240 10% 10%;
+    --background: 240 10% 15%;
     --foreground: 210 20% 98%;
-    --card: 240 10% 15%;
+    --card: 240 10% 20%;
     --card-foreground: 210 20% 98%;
     --popover: 240 10% 4.1%;
     --popover-foreground: 210 20% 98%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 10% 4.1%;
     --secondary: 0 0% 98%;
     --secondary-foreground: 240 10% 4.1%;
     --muted: 240 10% 25%;
@@ -66,8 +66,8 @@
   }
 
   .dark.theme-red {
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 10% 4.1%;
     --secondary: 0 0% 98%;
     --secondary-foreground: 240 10% 4.1%;
     --destructive: 0 0% 98%;
