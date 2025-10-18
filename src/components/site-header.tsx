@@ -24,9 +24,7 @@ export function SiteHeader() {
               </Link>
               <ThemeToggle />
             </div>
-            <div className="flex-1 flex justify-center">
-              <MainNav />
-            </div>
+            <MainNav />
             <div className="flex items-center justify-end gap-2">
                 <Link href="/events/create">
                     <Button variant="ghost" size="icon" className="hover:bg-primary/90 dark:hover:bg-white/10">
