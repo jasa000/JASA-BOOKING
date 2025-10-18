@@ -4,7 +4,6 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-import { ThemeWrapper } from '@/components/theme-wrapper';
 
 export const metadata: Metadata = {
   title: 'JASA BOOKING',
@@ -24,17 +23,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
       </head>
-      <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ThemeWrapper>
-            <FirebaseClientProvider>{children}</FirebaseClientProvider>
-            <Toaster />
-          </ThemeWrapper>
+      <body className="font-body antialiased min-h-screen bg-background">
+        <ThemeProvider>
+          <FirebaseClientProvider>{children}</FirebaseClientProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

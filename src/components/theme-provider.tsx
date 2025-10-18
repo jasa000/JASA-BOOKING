@@ -41,7 +41,7 @@ const initialThemeState: CustomThemeContextType = {
 
 const CustomThemeContext = React.createContext<CustomThemeContextType>(initialThemeState);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+function CustomThemeProvider({ children }: { children: React.ReactNode }) {
     const firestore = useFirestore();
     const { theme, setTheme: setNextTheme } = useNextTheme();
 
@@ -71,18 +71,40 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     const setTheme = useCallback((newTheme: Theme) => {
         setNextTheme(newTheme);
+        // Persist user's preference in localStorage
         localStorage.setItem("theme", newTheme);
     }, [setNextTheme]);
 
 
+    // Effect to set the initial theme based on localStorage or Firestore default
     React.useEffect(() => {
       const storedTheme = localStorage.getItem("theme");
-      if (!storedTheme && !settingsLoading && defaultTheme) {
-        setNextTheme(defaultTheme);
-      } else if (storedTheme) {
+      if (storedTheme) {
         setNextTheme(storedTheme as Theme);
+      } else if (!settingsLoading) {
+        setNextTheme(defaultTheme);
       }
     }, [defaultTheme, settingsLoading, setNextTheme]);
+
+
+    // Effect to apply the color theme class to the body
+    React.useEffect(() => {
+        if (settingsLoading) return;
+
+        const body = document.body;
+        const activeTheme = previewColorTheme || colorTheme;
+
+        // Clean up old themes
+        body.classList.forEach(className => {
+            if (className.startsWith('theme-')) {
+                body.classList.remove(className);
+            }
+        });
+        
+        // Add the new theme
+        body.classList.add(`theme-${activeTheme}`);
+
+    }, [colorTheme, previewColorTheme, settingsLoading]);
 
     const value = {
         theme: (theme as Theme) || 'system',
@@ -103,6 +125,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <CustomThemeProvider>{children}</CustomThemeProvider>
+    </NextThemesProvider>
+  )
+}
+
 export const useTheme = () => {
   const context = React.useContext(CustomThemeContext);
 
@@ -112,6 +148,3 @@ export const useTheme = () => {
 
   return context;
 };
-
-// Re-export NextThemesProvider to wrap it in layout
-export { NextThemesProvider };
