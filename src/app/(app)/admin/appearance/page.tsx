@@ -36,11 +36,8 @@ export default function AppearancePage() {
 
     useEffect(() => {
         setSelectedColorTheme(colorTheme);
-    }, [colorTheme]);
-
-    useEffect(() => {
         setSelectedDefaultTheme(defaultTheme);
-    }, [defaultTheme]);
+    }, [colorTheme, defaultTheme]);
     
     // Effect to handle previewing themes
     useEffect(() => {
@@ -86,6 +83,10 @@ export default function AppearancePage() {
     const handleCancelColor = () => {
         setSelectedColorTheme(colorTheme);
     };
+    
+    const handleCancelDefaultTheme = () => {
+        setSelectedDefaultTheme(defaultTheme);
+    }
 
     const hasColorChanges = selectedColorTheme !== colorTheme;
     const hasThemeChanges = selectedDefaultTheme !== defaultTheme;
@@ -178,6 +179,9 @@ export default function AppearancePage() {
                          ))}
                     </CardContent>
                      <CardFooter className="flex justify-end gap-2">
+                        {hasThemeChanges && (
+                            <Button variant="ghost" onClick={handleCancelDefaultTheme}>Cancel</Button>
+                        )}
                         <Button onClick={handleSaveDefaultTheme} disabled={!hasThemeChanges}>
                             Save Default Theme
                         </Button>
