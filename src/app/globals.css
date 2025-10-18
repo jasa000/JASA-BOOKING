@@ -54,49 +54,25 @@
     --shine-color-2: hsl(0 0% 0% / 0.4);
   }
   
-  body.theme-red {
+  .theme-red {
     --primary: 3.7 90.2% 57.1%;
     --primary-foreground: 0 0% 100%;
     --accent: 3.7 90.2% 47.1%;
   }
 
-  body.theme-royal-blue {
+  .theme-royal-blue {
     --primary: 221 83% 53%;
     --primary-foreground: 210 20% 98%;
     --accent: 221 83% 43%;
   }
 
-  body.theme-light-blue {
+  .theme-light-blue {
     --primary: 200 90% 60%;
     --primary-foreground: 210 20% 98%;
     --accent: 200 90% 50%;
   }
   
-  body.theme-royal-green {
-    --primary: 141 73% 42%;
-    --primary-foreground: 140 20% 98%;
-    --accent: 141 73% 32%;
-  }
-
-  body[data-preview-theme="red"] {
-    --primary: 3.7 90.2% 57.1%;
-    --primary-foreground: 0 0% 100%;
-    --accent: 3.7 90.2% 47.1%;
-  }
-
-  body[data-preview-theme="royal-blue"] {
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 20% 98%;
-    --accent: 221 83% 43%;
-  }
-
-  body[data-preview-theme="light-blue"] {
-    --primary: 200 90% 60%;
-    --primary-foreground: 210 20% 98%;
-    --accent: 200 90% 50%;
-  }
-  
-  body[data-preview-theme="royal-green"] {
+  .theme-royal-green {
     --primary: 141 73% 42%;
     --primary-foreground: 140 20% 98%;
     --accent: 141 73% 32%;

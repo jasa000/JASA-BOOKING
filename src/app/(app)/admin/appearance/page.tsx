@@ -21,7 +21,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function AppearancePage() {
     const { 
         theme, 
-        setTheme: setUserTheme,
         colorTheme, 
         setColorTheme, 
         defaultTheme, 
@@ -34,33 +33,14 @@ export default function AppearancePage() {
 
     const { toast } = useToast();
 
+    // This effect ensures the local state is updated when the global theme loads from DB
     useEffect(() => {
-        setSelectedColorTheme(colorTheme);
-        setSelectedDefaultTheme(defaultTheme);
-    }, [colorTheme, defaultTheme]);
-    
-    // Effect to handle previewing themes
-    useEffect(() => {
-        const body = document.body;
-        // Only run in light mode
-        if (document.documentElement.classList.contains('light')) {
-             if (selectedColorTheme !== colorTheme) {
-                body.dataset.previewTheme = selectedColorTheme;
-            } else {
-                delete body.dataset.previewTheme;
-            }
-             // Force a re-evaluation of styles
-            const root = document.documentElement;
-            root.style.setProperty("--dummy-var", Math.random().toString());
-
-            return () => {
-                delete body.dataset.previewTheme;
-                root.style.removeProperty("--dummy-var");
-            };
+        if (!settingsLoading) {
+            setSelectedColorTheme(colorTheme);
+            setSelectedDefaultTheme(defaultTheme);
         }
-    }, [selectedColorTheme, colorTheme, theme]);
-
-
+    }, [colorTheme, defaultTheme, settingsLoading]);
+    
     const handleSaveColor = () => {
         setColorTheme(selectedColorTheme);
         toast({
