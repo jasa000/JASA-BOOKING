@@ -64,10 +64,8 @@ export default function EventsPage() {
         <WelcomeBanner />
       </div>
       
-       <div className="border-b">
-         <div className='px-4 md:px-6 pt-4 md:pt-6 bg-background'>
-            <h3 className="text-base md:text-lg font-semibold mb-2 font-headline">Browse by Category</h3>
-         </div>
+       <div className="border-b py-8">
+         <h2 className="text-3xl font-bold font-headline mb-6 text-center">Browse by Category</h2>
          <div className='bg-primary text-primary-foreground'>
             <div className='px-4 md:px-6 py-2'>
                 <CategoryFilter selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
