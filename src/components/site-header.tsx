@@ -1,6 +1,7 @@
 
 "use client"
 
+import { MainNav } from "./main-nav"
 import { useTheme } from "./theme-provider"
 import { cn } from "@/lib/utils"
 
@@ -13,8 +14,8 @@ export function SiteHeader() {
             ? "bg-primary text-primary-foreground"
             : "dark:bg-black"
     )}>
-      <div className="relative flex h-16 items-center justify-between px-4 md:px-6">
-        {/* All header content has been removed as per the user request */}
+      <div className="relative flex h-16 items-center justify-center px-4 md:px-6">
+        <MainNav />
       </div>
     </header>
   )

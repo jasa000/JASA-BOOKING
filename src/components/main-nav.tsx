@@ -16,9 +16,12 @@ export function MainNav({
       className={cn("flex items-center", className)}
       {...props}
     >
-      <Link href="/" className="flex items-center space-x-2">
-        <span className="font-bold font-headline text-lg">
-          JASA BOOKING
+      <Link href="/" className="flex flex-col items-center space-y-0">
+        <span className="font-bold font-headline text-lg tracking-widest leading-none">
+          JASA
+        </span>
+        <span className="font-bold font-headline text-sm leading-none">
+          BOOKING
         </span>
       </Link>
     </nav>
