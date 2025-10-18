@@ -44,7 +44,7 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
 
 
     const value = {
-        theme: (theme as Theme) || 'system',
+        theme: (theme as Theme) || defaultTheme,
         setTheme,
     };
 
