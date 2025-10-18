@@ -71,7 +71,6 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
     
     const setTheme = useCallback((newTheme: Theme) => {
         setNextTheme(newTheme);
-        // Persist user's preference in localStorage
         try {
             localStorage.setItem("theme", newTheme);
         } catch (e) {
@@ -88,7 +87,7 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         // localStorage is not available
       }
-      if (storedTheme) {
+      if (storedTheme && ['light', 'dark', 'system'].includes(storedTheme)) {
         setNextTheme(storedTheme as Theme);
       } else if (!settingsLoading) {
         setNextTheme(defaultTheme);

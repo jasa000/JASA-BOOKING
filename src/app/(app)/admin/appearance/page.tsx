@@ -29,22 +29,17 @@ export default function AppearancePage() {
         setPreviewColorTheme
     } = useTheme();
 
-    const [selectedColorTheme, setSelectedColorTheme] = useState<ColorTheme>(colorTheme);
     const [selectedDefaultTheme, setSelectedDefaultTheme] = useState<Theme | undefined>(defaultTheme);
 
     const { toast } = useToast();
 
-    // Sync local state when global theme loads from DB or changes
     useEffect(() => {
         if (!settingsLoading) {
-            setSelectedColorTheme(colorTheme);
             setSelectedDefaultTheme(defaultTheme);
         }
-    }, [colorTheme, defaultTheme, settingsLoading]);
+    }, [defaultTheme, settingsLoading]);
 
-    // Handle previewing the theme
     const handleSelectColorTheme = (theme: ColorTheme) => {
-        setSelectedColorTheme(theme);
         setPreviewColorTheme(theme);
     };
     
@@ -70,7 +65,6 @@ export default function AppearancePage() {
     };
 
     const handleCancelColor = () => {
-        setSelectedColorTheme(colorTheme);
         setPreviewColorTheme(null); // Clear preview on cancel
     };
     
@@ -85,7 +79,7 @@ export default function AppearancePage() {
         };
     }, [setPreviewColorTheme]);
 
-    const hasColorChanges = previewColorTheme !== null;
+    const hasColorChanges = previewColorTheme !== null && previewColorTheme !== colorTheme;
     const hasThemeChanges = selectedDefaultTheme !== defaultTheme;
 
     if (settingsLoading) {
